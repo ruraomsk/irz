@@ -1,0 +1,30 @@
+logpath="log/"
+[modbus]
+	device="/dev/ttyUSB0"
+	baudrate=19200
+	paruty="N"
+	uid=247
+[watchdog]
+	step=1000 		#цикл watchdog
+[setBrams]
+	dbpath="db/"
+	step=1
+[hardware]
+	step=100		#цикл опроса датчиков миллисекунд
+	connect="127.0.0.1"
+	sport=5000
+	count=3
+	longkk=3		#Длительность кругом красный
+	pinos=1			#Номер входа ОС
+	pinyb=2			#Номер входа ЖМ
+[netware]
+	port=8000       ## порт откуда ждем настройки
+[rtc]
+[vpu]
+	step=100		#цикл опроса  миллисекунд
+	connect="127.0.0.1"
+	sport=5010
+[counter]
+	step=100		#цикл опроса  миллисекунд
+	connect="127.0.0.1"
+	sport=5011

@@ -1,0 +1,4 @@
+github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
+github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
+github.com/ruraomsk/ag-server v0.0.0-20221121091402-c37fef26ef8e h1:12pVHTFJdvHvNNEzqo1wyJX1RnzAMS5aLAfrZXeN5Rc=
+github.com/ruraomsk/ag-server v0.0.0-20221121091402-c37fef26ef8e/go.mod h1:MpuTy+cjEIJ11T6mZ8/WWQS/RdnowVzDoEO9Mwyin0o=
