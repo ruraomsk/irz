@@ -6,13 +6,19 @@ var (
 
 type Setup struct {
 	LogPath    string     `toml:"logpath"`
+	ID         int        `toml:"id"`
+	Server     Server     `toml:"server"`
 	Modbus     Modbus     `toml:"modbus"`
-	SetupBrams SetupBrams `toml:"setBrams"`
+	SetupPudge SetupPudge `toml:"pudge"`
 	WatchDog   WatchDog   `toml:"watchdog"`
 	Hardware   Hardware   `toml:"hardware"`
 	Netware    Netware    `toml:"netware"`
 	Vpu        Vpu        `toml:"vpu"`
 	Counter    Counter    `toml:"counter"`
+}
+type Server struct {
+	Host string `toml:"host"`
+	Port int    `toml:"port"`
 }
 type Modbus struct {
 	Device   string `toml:"device"`
@@ -20,9 +26,8 @@ type Modbus struct {
 	Parity   string `toml:"parity"`
 	UId      int    `toml:"uid"`
 }
-type SetupBrams struct {
+type SetupPudge struct {
 	DbPath string `toml:"dbpath"`
-	Step   int    `toml:"step"`
 }
 type WatchDog struct {
 	Step int `toml:"step"`

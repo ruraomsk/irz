@@ -5,10 +5,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"runtime"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/ruraomsk/ag-server/logger"
+	"github.com/ruraomsk/irz/comm"
+	"github.com/ruraomsk/irz/data"
 	"github.com/ruraomsk/irz/setup"
 )
 
@@ -26,7 +30,7 @@ func init() {
 	}
 
 	os.MkdirAll(setup.Set.LogPath, 0777)
-	os.MkdirAll(setup.Set.SetupBrams.DbPath, 0777)
+	os.MkdirAll(setup.Set.SetupPudge.DbPath, 0777)
 }
 
 func main() {
@@ -38,6 +42,12 @@ func main() {
 	}
 	fmt.Println("iRZ start")
 	logger.Info.Println("iRZ start")
+	data.LoadAll()
+	go comm.ToServer()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	<-c
+	time.Sleep(10 * time.Second)
 	fmt.Println("iRZ stop")
 	logger.Info.Println("iRZ stop")
 

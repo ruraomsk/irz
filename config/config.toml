@@ -1,14 +1,17 @@
 logpath="log/"
+id=909090			#Номер устройства
 [modbus]
 	device="/dev/ttyUSB0"
 	baudrate=19200
 	paruty="N"
 	uid=247
+[server]
+	host="asdu.tech"
+	port=1096
 [watchdog]
 	step=1000 		#цикл watchdog
-[setBrams]
+[pudge]
 	dbpath="db/"
-	step=1
 [hardware]
 	step=100		#цикл опроса датчиков миллисекунд
 	connect="127.0.0.1"
