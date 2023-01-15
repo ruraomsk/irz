@@ -7,7 +7,7 @@ id=909090			#Номер устройства
 	uid=247
 [server]
 	host="asdu.tech"
-	port=1096
+	port=1093
 [watchdog]
 	step=1000 		#цикл watchdog
 [pudge]

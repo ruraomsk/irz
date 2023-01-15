@@ -16,8 +16,24 @@ var mutex sync.Mutex
 var DataValue Common
 var pathCommon string
 
+type CommandDU struct {
+	PK int
+	CK int
+	NK int
+	DU int
+}
+
+func (d *CommandDU) setEmpty() {
+	d.PK = 0
+	d.CK = 0
+	d.NK = 0
+	d.DU = 9
+}
+
 type Common struct {
 	Controller pudge.Controller `json:"controller"`
+	change     bool
+	CommandDU  CommandDU
 }
 
 func (c *Common) setEmpty() {
@@ -31,14 +47,15 @@ func (c *Common) setEmpty() {
 	c.Controller.ConnectTime = time.Unix(0, 0)
 	c.Controller.TechMode = 1
 	c.Controller.DK.TDK = 1
-	c.Controller.Model.VPCPDL = 0
-	c.Controller.Model.VPCPDR = 0
-	c.Controller.Model.VPBSL = 0
-	c.Controller.Model.VPBSR = 0
+	c.Controller.Model.VPCPDL = 15
+	c.Controller.Model.VPCPDR = 5
+	c.Controller.Model.VPBSL = 1
+	c.Controller.Model.VPBSR = 1
 	c.Controller.Status.TObmen = 5
 	c.Controller.Traffic = pudge.Traffic{}
 	c.Controller.Arrays = make([]pudge.ArrayPriv, 0)
 	c.Controller.LogLines = make([]pudge.LogLine, 0)
+	c.CommandDU.setEmpty()
 }
 func (c *Common) Save() error {
 	mutex.Lock()
@@ -61,6 +78,37 @@ func (c *Common) SetConnected(status bool) {
 	c.Controller.StatusConnection = status
 	mutex.Unlock()
 }
+func (c *Common) SetSFDK(status bool) {
+	mutex.Lock()
+	DataValue.Controller.StatusCommandDU.IsReqSFDK1 = status
+	DataValue.change = true
+	mutex.Unlock()
+}
+func (c *Common) SetPK(status int) {
+	mutex.Lock()
+	DataValue.CommandDU.PK = status
+	DataValue.change = true
+	mutex.Unlock()
+}
+func (c *Common) SetNK(status int) {
+	mutex.Lock()
+	DataValue.CommandDU.NK = status
+	DataValue.change = true
+	mutex.Unlock()
+}
+func (c *Common) SetCK(status int) {
+	mutex.Lock()
+	DataValue.CommandDU.CK = status
+	DataValue.change = true
+	mutex.Unlock()
+}
+func (c *Common) SetDU(status int) {
+	mutex.Lock()
+	DataValue.CommandDU.DU = status
+	DataValue.change = true
+	mutex.Unlock()
+}
+
 func LoadAll() {
 	pathCommon = setup.Set.SetupPudge.DbPath + "common.json"
 	file, err := os.ReadFile(pathCommon)
@@ -83,6 +131,7 @@ func LoadAll() {
 	if err != nil {
 		logger.Error.Printf("При записи файла %s %s", pathCommon, err.Error())
 	}
+	DataValue.CommandDU.setEmpty()
 	go run()
 }
 func run() {
