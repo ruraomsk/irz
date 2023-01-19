@@ -15,6 +15,9 @@ import (
 
 var socket net.Conn
 var err error
+var priv bool
+var lastTechmode int
+var areaPriv []uint8
 
 func ToServer() {
 	stop := make(chan os.Signal, 1)
@@ -39,24 +42,33 @@ func ToServer() {
 		readTout := time.Duration(int64(data.DataValue.Controller.Status.TObmen*60-30) * int64(time.Second))
 		go transport.GetMessagesFromServer(socket, fromServer, &readTout, errTcp)
 		go transport.SendMessagesToServer(socket, toServer, &readTout, errTcp)
-
+		priv = false
 		toServer <- makeHeaderForConnect()
-		ticker := time.NewTicker(readTout)
+		ticker := time.NewTicker(1 * time.Second)
 		work := true
 		for work {
 			select {
 			case <-ticker.C:
-				toServer <- makeStatus()
+				data.DataValue.SetNowTime()
+				if data.DataValue.Controller.IsConnected() {
+					if time.Now().Sub(data.DataValue.Controller.LastOperation) > readTout {
+						data.DataValue.SetLastOperation()
+						toServer <- makeStatus()
+					}
+				}
 			case in := <-fromServer:
 				logger.Debug.Printf("Пришло сообщение %v", in)
+				data.DataValue.SetLastOperation()
 				if !data.DataValue.Controller.IsConnected() {
 					//Нам разрешили работать
+					data.DataValue.SetConnectTime()
 					logger.Info.Printf("Произошло подключение к серверу %s", socket.RemoteAddr().String())
 					data.DataValue.SetConnected(true)
 					continue
 				}
 				replay, need := makeReplay(in)
 				if need {
+					data.DataValue.SetLastOperation()
 					toServer <- replay
 				}
 			case s := <-errTcp:
@@ -81,6 +93,8 @@ func makeStatus() transport.HeaderDevice {
 	var ms transport.SubMessage
 	ms.Set0x12Device(&data.DataValue.Controller)
 	mss = append(mss, ms)
+	ms.Set0x11Device(&data.DataValue.Controller)
+	mss = append(mss, ms)
 	hd.UpackMessages(mss)
 	return hd
 }
@@ -88,22 +102,52 @@ func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
 	var hd = transport.CreateHeaderDevice(data.DataValue.Controller.ID, 0, 0, 1)
 	mss := make([]transport.SubMessage, 0)
 	var ms transport.SubMessage
-	dmess := in.ParseMessage()
 	need := false
-	sendStatus := false
 	if in.Number != 0 {
 		ms.Set0x01Device(int(in.Number), time.Now().Minute(), time.Now().Second(), 0, 0)
 		mss = append(mss, ms)
+		need = true
 	}
+	if priv {
+		if in.Message[0] == 0 && in.Message[1] == 2 && in.Message[2] == 2 && in.Message[3] == 2 {
+			logger.Info.Print("Включить управление")
+			priv = false
+			data.DataValue.Controller.TechMode = lastTechmode
+			if isGoodPriv() {
+				logger.Info.Print("Привязки хорошие")
+				data.DataValue.SetBase(false)
+			} else {
+				logger.Info.Print("Привязки плохие")
+			}
+			ms.Set0x12Device(&data.DataValue.Controller)
+			mss = append(mss, ms)
+			ms.Set0x11Device(&data.DataValue.Controller)
+			mss = append(mss, ms)
+
+		} else {
+			areaPriv = append(areaPriv, in.Message...)
+		}
+		if need {
+			hd.UpackMessages(mss)
+		}
+		return hd, need
+	}
+	dmess := in.ParseMessage()
+	sendStatus := false
 	for _, mes := range dmess {
-		switch mes.Type {
+		switch mes.GetCodeCommandServer() {
 		case 1:
 			logger.Info.Printf("Подтвердили сообощение %d", mes.Get0x01Server())
 		case 2:
 			if mes.Get0x02Server() {
-				logger.Info.Print("Включить управление")
+				logger.Info.Print("Включить управление передано перед отключить")
 			} else {
 				logger.Info.Print("Выключить управление")
+				priv = true
+				areaPriv = make([]uint8, 0)
+				lastTechmode = data.DataValue.Controller.TechMode
+				data.DataValue.SetTechMode(8)
+				sendStatus = true
 			}
 		case 3:
 			//Запрос состояния устройства
@@ -132,26 +176,32 @@ func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
 		if sendStatus {
 			ms.Set0x12Device(&data.DataValue.Controller)
 			mss = append(mss, ms)
+			ms.Set0x11Device(&data.DataValue.Controller)
+			mss = append(mss, ms)
 		}
 		hd.UpackMessages(mss)
 	}
 	return hd, need
 }
 func makeHeaderForConnect() transport.HeaderDevice {
-	var hd = transport.CreateHeaderDevice(data.DataValue.Controller.ID, 0, 1, 1)
+	var hd = transport.CreateHeaderDevice(data.DataValue.Controller.ID, 0, 1, 0x7f)
 
 	mss := make([]transport.SubMessage, 0)
 	var ms transport.SubMessage
 	ms.Set0x1DDevice(&data.DataValue.Controller)
 	mss = append(mss, ms)
-	ms.Set0x10Device(&data.DataValue.Controller)
-	mss = append(mss, ms)
-	ms.Set0x12Device(&data.DataValue.Controller)
-	mss = append(mss, ms)
-	ms.Set0x1BDevice(&data.DataValue.Controller)
-	mss = append(mss, ms)
-	ms.Set0x11Device(&data.DataValue.Controller)
-	mss = append(mss, ms)
+	// ms.Set0x10Device(&data.DataValue.Controller)
+	// mss = append(mss, ms)
+	// ms.Set0x12Device(&data.DataValue.Controller)
+	// mss = append(mss, ms)
+	// ms.Set0x1BDevice(&data.DataValue.Controller)
+	// mss = append(mss, ms)
+	// ms.Set0x11Device(&data.DataValue.Controller)
+	// mss = append(mss, ms)
 	hd.UpackMessages(mss)
 	return hd
+}
+func isGoodPriv() bool {
+	logger.Info.Printf("Проверяем полученные привязки\n%v", areaPriv)
+	return true
 }

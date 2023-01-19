@@ -1,12 +1,13 @@
 logpath="log/"
-id=909090			#Номер устройства
+id=198460			#Номер устройства
 [modbus]
 	device="/dev/ttyUSB0"
 	baudrate=19200
 	paruty="N"
 	uid=247
 [server]
-	host="asdu.tech"
+	# host="asdu.tech"
+	host="10.151.50.126"
 	port=1093
 [watchdog]
 	step=1000 		#цикл watchdog

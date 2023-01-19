@@ -56,6 +56,3 @@ type Counter struct {
 	Connect string `toml:"connect"`
 	SPort   int    `toml:"sport"`
 }
-
-func init() {
-}
