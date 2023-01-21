@@ -51,7 +51,7 @@ func ToServer() {
 			case <-ticker.C:
 				data.DataValue.SetNowTime()
 				if data.DataValue.Controller.IsConnected() {
-					if time.Now().Sub(data.DataValue.Controller.LastOperation) > readTout {
+					if time.Since((data.DataValue.Controller.LastOperation)) > readTout {
 						data.DataValue.SetLastOperation()
 						toServer <- makeStatus()
 					}
@@ -113,7 +113,7 @@ func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
 			logger.Info.Print("Включить управление")
 			priv = false
 			data.DataValue.Controller.TechMode = lastTechmode
-			if isGoodPriv() {
+			if moveArrasIsGood() {
 				logger.Info.Print("Привязки хорошие")
 				data.DataValue.SetBase(false)
 			} else {
@@ -125,7 +125,9 @@ func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
 			mss = append(mss, ms)
 
 		} else {
-			areaPriv = append(areaPriv, in.Message...)
+			if in.Message[0] != 0 {
+				areaPriv = append(areaPriv, in.Message...)
+			}
 		}
 		if need {
 			hd.UpackMessages(mss)
@@ -160,16 +162,16 @@ func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
 			need = true
 		case 5:
 			//Смена плана ПК
-			data.DataValue.SetPK(mes.Get0x05Server())
+			data.Commands <- data.InternalCmd{Source: data.Server, Command: 5, Parametr: mes.Get0x05Server()}
 		case 6:
 			//Смена НК
-			data.DataValue.SetNK(mes.Get0x06Server())
+			data.Commands <- data.InternalCmd{Source: data.Server, Command: 6, Parametr: mes.Get0x06Server()}
 		case 7:
 			//Смена CК
-			data.DataValue.SetCK(mes.Get0x07Server())
+			data.Commands <- data.InternalCmd{Source: data.Server, Command: 7, Parametr: mes.Get0x07Server()}
 		case 9:
 			//Смена ДУ
-			data.DataValue.SetDU(mes.Get0x09Server())
+			data.Commands <- data.InternalCmd{Source: data.Server, Command: 9, Parametr: mes.Get0x09Server()}
 		}
 	}
 	if need {
@@ -192,16 +194,12 @@ func makeHeaderForConnect() transport.HeaderDevice {
 	mss = append(mss, ms)
 	// ms.Set0x10Device(&data.DataValue.Controller)
 	// mss = append(mss, ms)
-	// ms.Set0x12Device(&data.DataValue.Controller)
-	// mss = append(mss, ms)
+	ms.Set0x12Device(&data.DataValue.Controller)
+	mss = append(mss, ms)
 	// ms.Set0x1BDevice(&data.DataValue.Controller)
 	// mss = append(mss, ms)
 	// ms.Set0x11Device(&data.DataValue.Controller)
 	// mss = append(mss, ms)
 	hd.UpackMessages(mss)
 	return hd
-}
-func isGoodPriv() bool {
-	logger.Info.Printf("Проверяем полученные привязки\n%v", areaPriv)
-	return true
 }

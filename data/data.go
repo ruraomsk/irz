@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ruraomsk/ag-server/binding"
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/irz/setup"
@@ -25,6 +26,7 @@ type CommandDU struct {
 
 type Common struct {
 	Controller pudge.Controller `json:"controller"`
+	Arrays     binding.Arrays
 	change     bool
 	CommandDU  CommandDU
 }
@@ -41,7 +43,7 @@ func (c *Common) setEmpty() {
 	c.Controller.TechMode = 1
 	c.Controller.DK.RDK = 8
 	c.Controller.DK.FDK = 1
-	c.Controller.DK.DDK = 4
+	c.Controller.DK.DDK = 2
 	c.Controller.DK.EDK = 0
 	c.Controller.DK.TDK = 1
 	c.Controller.DK.ODK = false
@@ -55,6 +57,7 @@ func (c *Common) setEmpty() {
 	c.Controller.Traffic = pudge.Traffic{}
 	c.Controller.Arrays = make([]pudge.ArrayPriv, 0)
 	c.Controller.LogLines = make([]pudge.LogLine, 0)
+	c.Arrays = *binding.NewArrays()
 }
 func (c *Common) Save() error {
 	mutex.Lock()
@@ -156,6 +159,12 @@ func (c *Common) SetTechMode(status int) {
 	DataValue.change = true
 	mutex.Unlock()
 }
+func (c *Common) SetArrays(arrays binding.Arrays) {
+	mutex.Lock()
+	DataValue.Arrays = arrays
+	DataValue.change = true
+	mutex.Unlock()
+}
 
 func LoadAll() {
 	pathCommon = setup.Set.SetupPudge.DbPath + "common.json"
@@ -189,6 +198,8 @@ func LoadAll() {
 	DataValue.SetConnected(false)
 	DataValue.Controller.GPS.Ok = true
 	DataValue.Controller.Status.Ethernet = true
+
+	initChans()
 
 	go run()
 }
