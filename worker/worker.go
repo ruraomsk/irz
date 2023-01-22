@@ -29,7 +29,7 @@ func Worker() {
 
 			}
 		case ars := <-data.Arrays:
-			logger.Info.Printf("Новая привязка %v", ars.IsCorrect())
+			data.DataValue.SetArrays(ars)
 		case <-tik.C:
 
 		}
