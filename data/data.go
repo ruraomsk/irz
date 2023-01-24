@@ -23,12 +23,17 @@ type CommandDU struct {
 	NK int
 	DU int
 }
+type Server struct {
+	Host string `toml:"host"`
+	Port int    `toml:"port"`
+}
 
 type Common struct {
 	Controller pudge.Controller `json:"controller"`
 	Arrays     binding.Arrays
 	change     bool
 	CommandDU  CommandDU
+	Server     Server
 }
 
 func (c *Common) setEmpty() {
@@ -58,6 +63,8 @@ func (c *Common) setEmpty() {
 	c.Controller.Arrays = make([]pudge.ArrayPriv, 0)
 	c.Controller.LogLines = make([]pudge.LogLine, 0)
 	c.Arrays = *binding.NewArrays()
+	c.Server.Host = setup.Set.Server.Host
+	c.Server.Port = setup.Set.Server.Port
 }
 func (c *Common) Save() error {
 	mutex.Lock()

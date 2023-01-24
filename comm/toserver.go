@@ -30,10 +30,19 @@ func ToServer() {
 	errTcp := make(chan net.Conn, 1)
 	for {
 		for !connected {
-			socket, err = net.Dial("tcp", fmt.Sprintf("%s:%d", setup.Set.Server.Host, setup.Set.Server.Port))
+			socket, err = net.Dial("tcp", fmt.Sprintf("%s:%d", data.DataValue.Server.Host, data.DataValue.Server.Port))
 			if err != nil {
 				logger.Error.Printf("Error dial %s %s", setup.Set.Server.Host, err.Error())
-				time.Sleep(10 * time.Second)
+				slp := time.NewTimer(10 * time.Second)
+				to := true
+				for to {
+					select {
+					case cmd := <-data.ToServer:
+						logger.Info.Printf("Пропущена команда %d", cmd)
+					case <-slp.C:
+						to = false
+					}
+				}
 				continue
 			}
 			connected = true
@@ -48,6 +57,12 @@ func ToServer() {
 		work := true
 		for work {
 			select {
+			case cmd := <-data.ToServer:
+				logger.Debug.Printf("Пришла команда %d", cmd)
+				if cmd == 1 { //Что то изменилось и нам нужно сообщить об этом
+					data.DataValue.SetLastOperation()
+					toServer <- makeStatus()
+				}
 			case <-ticker.C:
 				data.DataValue.SetNowTime()
 				if data.DataValue.Controller.IsConnected() {
@@ -162,16 +177,16 @@ func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
 			need = true
 		case 5:
 			//Смена плана ПК
-			data.Commands <- data.InternalCmd{Source: data.Server, Command: 5, Parametr: mes.Get0x05Server()}
+			data.Commands <- data.InternalCmd{Source: data.IBM, Command: 5, Parametr: mes.Get0x05Server()}
 		case 6:
 			//Смена НК
-			data.Commands <- data.InternalCmd{Source: data.Server, Command: 6, Parametr: mes.Get0x06Server()}
+			data.Commands <- data.InternalCmd{Source: data.IBM, Command: 6, Parametr: mes.Get0x06Server()}
 		case 7:
 			//Смена CК
-			data.Commands <- data.InternalCmd{Source: data.Server, Command: 7, Parametr: mes.Get0x07Server()}
+			data.Commands <- data.InternalCmd{Source: data.IBM, Command: 7, Parametr: mes.Get0x07Server()}
 		case 9:
 			//Смена ДУ
-			data.Commands <- data.InternalCmd{Source: data.Server, Command: 9, Parametr: mes.Get0x09Server()}
+			data.Commands <- data.InternalCmd{Source: data.IBM, Command: 9, Parametr: mes.Get0x09Server()}
 		}
 	}
 	if need {
