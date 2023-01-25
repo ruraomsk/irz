@@ -9,9 +9,12 @@ type InternalCmd struct {
 }
 
 const (
-	Pult = 1
+	DKDevice = 1
+	VPU
+	IngenerUSDK
+	USDK
+	IngenerDK
 	IBM
-	Controller
 )
 
 type StatusDevice struct {

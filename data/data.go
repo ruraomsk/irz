@@ -172,6 +172,12 @@ func (c *Common) SetArrays(arrays binding.Arrays) {
 	DataValue.change = true
 	mutex.Unlock()
 }
+func (c *Common) SetDK(dk pudge.DK) {
+	mutex.Lock()
+	DataValue.Controller.DK = dk
+	DataValue.change = true
+	mutex.Unlock()
+}
 
 func LoadAll() {
 	pathCommon = setup.Set.SetupPudge.DbPath + "common.json"

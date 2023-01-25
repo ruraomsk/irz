@@ -39,15 +39,20 @@ func Device() {
 				state.Phase = phaseLR
 				endPhase = *time.NewTimer(time.Duration(phases[phaseLR-1]-promTakt) * time.Second)
 				data.FromDevice <- state
-			case 0x0a:
+			case 0x10:
 				stopLRifNeed()
 				state.Need = 10
 				state.Phase = 10
 				data.FromDevice <- state
-			case 0x0b:
+			case 0x11:
 				stopLRifNeed()
 				state.Need = 11
 				state.Phase = 11
+				data.FromDevice <- state
+			case 0x12:
+				stopLRifNeed()
+				state.Need = 12
+				state.Phase = 12
 				data.FromDevice <- state
 			default:
 				state.Need = in

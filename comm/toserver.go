@@ -63,6 +63,12 @@ func ToServer() {
 					data.DataValue.SetLastOperation()
 					toServer <- makeStatus()
 				}
+				if cmd == 0 && data.DataValue.Controller.StatusCommandDU.IsReqSFDK1 {
+					// Изменине слать если есть контроль со стороны сервера
+					data.DataValue.SetLastOperation()
+					toServer <- makeStatus()
+				}
+
 			case <-ticker.C:
 				data.DataValue.SetNowTime()
 				if data.DataValue.Controller.IsConnected() {
