@@ -49,7 +49,8 @@ func ToServer() {
 		}
 		logger.Info.Printf("Начинаем работу с %s", socket.RemoteAddr().String())
 		readTout := time.Duration(int64(data.DataValue.Controller.Status.TObmen*60-30) * int64(time.Second))
-		go transport.GetMessagesFromServer(socket, fromServer, &readTout, errTcp)
+		longTout := time.Duration(24 * time.Hour)
+		go transport.GetMessagesFromServer(socket, fromServer, &longTout, errTcp)
 		go transport.SendMessagesToServer(socket, toServer, &readTout, errTcp)
 		priv = false
 		toServer <- makeHeaderForConnect()
@@ -58,7 +59,7 @@ func ToServer() {
 		for work {
 			select {
 			case cmd := <-data.ToServer:
-				logger.Debug.Printf("Пришла команда %d", cmd)
+				// logger.Debug.Printf("Пришла команда %d", cmd)
 				if cmd == 1 { //Что то изменилось и нам нужно сообщить об этом
 					data.DataValue.SetLastOperation()
 					toServer <- makeStatus()
@@ -66,7 +67,7 @@ func ToServer() {
 				if cmd == 0 && data.DataValue.Controller.StatusCommandDU.IsReqSFDK1 {
 					// Изменине слать если есть контроль со стороны сервера
 					data.DataValue.SetLastOperation()
-					toServer <- makeStatus()
+					toServer <- makeSFDKreplay()
 				}
 
 			case <-ticker.C:
@@ -119,6 +120,16 @@ func makeStatus() transport.HeaderDevice {
 	hd.UpackMessages(mss)
 	return hd
 }
+func makeSFDKreplay() transport.HeaderDevice {
+	var hd = transport.CreateHeaderDevice(data.DataValue.Controller.ID, 0, 0, 1)
+	mss := make([]transport.SubMessage, 0)
+	var ms transport.SubMessage
+	ms.Set0x12Device(&data.DataValue.Controller)
+	mss = append(mss, ms)
+	hd.UpackMessages(mss)
+	return hd
+}
+
 func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
 	var hd = transport.CreateHeaderDevice(data.DataValue.Controller.ID, 0, 0, 1)
 	mss := make([]transport.SubMessage, 0)
@@ -144,7 +155,7 @@ func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
 			mss = append(mss, ms)
 			ms.Set0x11Device(&data.DataValue.Controller)
 			mss = append(mss, ms)
-
+			need = true
 		} else {
 			if in.Message[0] != 0 {
 				areaPriv = append(areaPriv, in.Message...)

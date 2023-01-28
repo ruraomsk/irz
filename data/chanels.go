@@ -18,10 +18,17 @@ const (
 )
 
 type StatusDevice struct {
-	Need  int  // Заданная фаза
-	Phase int  // Текущая фаза
-	Door  bool // Открыта ди дверь
-	Lamp  int  // На какой фазе перегорели двери
+	PhaseTU int  // Заданная фаза
+	PhaseTC int  // Текущая фаза
+	Door    bool // Открыта ди дверь
+	Lamp    int  // На какой фазе перегорели двери
+	TimeTU  int  // Время фазы ТУ
+	TimeTC  int  // Время фазы ТС
+}
+
+func (s *StatusDevice) NewPhase() {
+	s.TimeTC = 0
+	s.TimeTU = 0
 }
 
 var Commands chan InternalCmd
@@ -31,9 +38,9 @@ var ToDevice chan int
 var FromDevice chan StatusDevice
 
 func initChans() {
-	Commands = make(chan InternalCmd, 10)
-	Arrays = make(chan binding.Arrays)
-	ToServer = make(chan int)
-	ToDevice = make(chan int)
-	FromDevice = make(chan StatusDevice)
+	Commands = make(chan InternalCmd, 100)
+	Arrays = make(chan binding.Arrays, 100)
+	ToServer = make(chan int, 100)
+	ToDevice = make(chan int, 100)
+	FromDevice = make(chan StatusDevice, 100)
 }
