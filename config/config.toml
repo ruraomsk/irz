@@ -6,8 +6,8 @@ id=198460			#Номер устройства
 	paruty="N"
 	uid=247
 [server]
-	# host="10.151.50.126"
-	host="127.0.0.1"
+	host="10.151.50.126"
+	# host="127.0.0.1"
 	port=1093
 [watchdog]
 	step=1000 		#цикл watchdog

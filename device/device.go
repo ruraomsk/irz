@@ -14,12 +14,13 @@ var lR = true
 var phaseLR = 1
 var endPhase time.Timer
 var tick = time.NewTicker(1 * time.Second)
-var state = data.StatusDevice{Door: false, Lamp: 0, PhaseTC: 0, PhaseTU: 0}
+var state = data.StatusDevice{Door: false, Lamp: 0, Phase: 0, PhaseTC: 0, PhaseTU: 0}
 
 func Device() {
 	if lR {
+		state.Phase = 1
 		state.PhaseTC = 1
-		state.PhaseTU = 0
+		state.PhaseTU = 1
 		// endPhase = *time.NewTimer(time.Duration(phases[0]) * time.Second)
 		endPhase = *time.NewTimer(10 * time.Second)
 	}
@@ -34,53 +35,65 @@ func Device() {
 			logger.Debug.Printf("from worker %v", in)
 			switch in {
 			case 0:
-				state.PhaseTU = 0
 				if lR {
 					continue
 				}
+				phaseLR = 1
 				if state.PhaseTC != 1 {
 					makePromTakt()
 				}
 				lR = true
-				phaseLR = 1
+
 				state.PhaseTC = phaseLR
-				// endPhase = *time.NewTimer(time.Duration(phases[phaseLR-1]-promTakt) * time.Second)
-				endPhase = *time.NewTimer(10 * time.Second)
+				state.PhaseTU = state.PhaseTC
+				state.Phase = phaseLR
+				endPhase = *time.NewTimer(time.Duration(phases[phaseLR-1]-promTakt) * time.Second)
+				// endPhase = *time.NewTimer(20 * time.Second)
 			case 10:
 				stopLRifNeed()
+				state.Phase = 10
 				state.PhaseTU = 10
 				state.PhaseTC = 10
 				data.FromDevice <- state
 			case 11:
 				stopLRifNeed()
+				state.Phase = 11
 				state.PhaseTU = 11
 				state.PhaseTC = 11
 				data.FromDevice <- state
 			case 12:
 				stopLRifNeed()
+				state.Phase = 12
 				state.PhaseTU = 12
 				state.PhaseTC = 12
 				data.FromDevice <- state
 			default:
+				data.FromDevice <- state
 				state.PhaseTU = in
 				if in > 0 && in <= len(phases) {
+
+					state.PhaseTU = in
 					stopLRifNeed()
 					if state.PhaseTC != in {
+						phaseLR = in
 						makePromTakt()
 					} else {
 						state.NewPhase()
 					}
 					state.PhaseTC = in
+					state.Phase = in
 					data.FromDevice <- state
 				} else {
 					if !lR {
+						state.PhaseTU = phaseLR
 						if state.PhaseTC != 1 {
 							makePromTakt()
 						}
 						phaseLR = 1
 						state.PhaseTC = phaseLR
-						// endPhase = *time.NewTimer(time.Duration(phases[phaseLR-1]-promTakt) * time.Second)
-						endPhase = *time.NewTimer(10 * time.Second)
+						state.Phase = phaseLR
+						endPhase = *time.NewTimer(time.Duration(phases[phaseLR-1]-promTakt) * time.Second)
+						// endPhase = *time.NewTimer(10 * time.Second)
 						data.FromDevice <- state
 					}
 				}
@@ -90,31 +103,40 @@ func Device() {
 			if !lR {
 				continue
 			}
-			data.FromDevice <- state
-
 			phaseLR++
 			if phaseLR > len(phases) {
 				phaseLR = 1
 			}
-			logger.Info.Printf("Новая фаза ЛР %d", phaseLR)
 			makePromTakt()
-			state.PhaseTC = phaseLR
-			// endPhase = *time.NewTimer(time.Duration(phases[phaseLR-1]-promTakt) * time.Second)
-			endPhase = *time.NewTimer(10 * time.Second)
+			logger.Info.Printf("Новая фаза ЛР %d", phaseLR)
+			endPhase = *time.NewTimer(time.Duration(phases[phaseLR-1]-promTakt) * time.Second)
+			// endPhase = *time.NewTimer(20 * time.Second)
 		}
 	}
 
 }
 func makePromTakt() {
 	tick.Stop()
+	state.Phase = 9
+	data.FromDevice <- state
+	time.Sleep(time.Second)
 	state.NewPhase()
+	state.PhaseTC = 9
+	state.PhaseTU = phaseLR
+	state.Phase = phaseLR
 	for i := 0; i < promTakt; i++ {
 		time.Sleep(time.Second)
 	}
-	state.PhaseTC = 9
-	state.TimeTC += promTakt
-	state.TimeTU += promTakt
+	state.TimeTC = promTakt
+	state.TimeTU = promTakt
 	data.FromDevice <- state
+	state.TimeTC -= promTakt
+	state.TimeTU -= promTakt
+	state.PhaseTC = phaseLR
+	// state.TimeTC = promTakt
+	// state.TimeTU += promTakt
+	// state.TimeTC = promTakt
+	// state.TimeTC = 0
 	tick = time.NewTicker(1 * time.Second)
 }
 func stopLRifNeed() {

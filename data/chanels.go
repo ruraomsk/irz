@@ -18,6 +18,7 @@ const (
 )
 
 type StatusDevice struct {
+	Phase   int  //Фаза плана
 	PhaseTU int  // Заданная фаза
 	PhaseTC int  // Текущая фаза
 	Door    bool // Открыта ди дверь
@@ -40,7 +41,7 @@ var FromDevice chan StatusDevice
 func initChans() {
 	Commands = make(chan InternalCmd, 100)
 	Arrays = make(chan binding.Arrays, 100)
-	ToServer = make(chan int, 100)
-	ToDevice = make(chan int, 100)
-	FromDevice = make(chan StatusDevice, 100)
+	ToServer = make(chan int, 1)
+	ToDevice = make(chan int, 1)
+	FromDevice = make(chan StatusDevice, 1)
 }

@@ -39,6 +39,7 @@ func Worker() {
 	dk.FDK = 0
 	dk.RDK = 6
 	dk.DDK = data.USDK
+	oldDK = dk
 	data.DataValue.SetDK(dk)
 	if data.DataValue.Controller.Base {
 		data.ToDevice <- 0
@@ -89,7 +90,7 @@ func Worker() {
 						}
 						isDU = false
 						dk.RDK = 6
-						dk.FDK = 0
+						dk.FDK = 1
 						data.DataValue.SetDK(dk)
 						data.ToDevice <- 0
 						data.ToServer <- 0
@@ -109,7 +110,7 @@ func Worker() {
 					//Выключаем ДУ производим выбор нового плана
 					// Но пока для  отладки снова врубаем ЛР
 					dk.RDK = 6
-					dk.FDK = 0
+					dk.FDK = 1
 					data.DataValue.SetDK(dk)
 					data.ToDevice <- 0
 					data.ToServer <- 0
@@ -132,24 +133,20 @@ func Worker() {
 			// 	data.ToServer <- 0
 			// }
 		case dev := <-data.FromDevice:
+			dk = data.DataValue.Controller.DK
 			logger.Info.Printf("От устройства %v", dev)
-			// if dev.PhaseTC == 9 && !isPromtakt {
-			// 	dk.TDK = 0
-			// 	dk.TTCDK = 0
-			// 	isPromtakt = true
-			// }
-			// if dev.PhaseTC != 9 {
-			// 	isPromtakt = false
-			// }
+			dk.FDK = dev.Phase
 			dk.TTCDK = dev.TimeTC
 			dk.TDK = dev.TimeTU
 			dk.FTSDK = dev.PhaseTC
 			dk.FTUDK = dev.PhaseTU
-			if isChangeDK() {
-				data.DataValue.SetDK(dk)
-				oldDK = dk
-				data.ToServer <- 0
+			if dk.RDK == 5 || dk.RDK == 6 {
+				dk.FTUDK = 0
+				dk.TDK = 0
 			}
+			data.DataValue.SetDK(dk)
+			logger.Info.Printf("%v", data.DataValue.Controller.DK)
+			data.ToServer <- 0
 		}
 	}
 }
@@ -170,9 +167,6 @@ func isChangeDK() bool {
 		return true
 	}
 	if oldDK.FTSDK != dk.FTSDK {
-		return true
-	}
-	if oldDK.FTUDK != dk.FTUDK {
 		return true
 	}
 	if oldDK.LDK != dk.LDK {
