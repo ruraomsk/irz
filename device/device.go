@@ -9,7 +9,7 @@ import (
 
 // Исполнение команд на устройстве
 var promTakt = 5
-var phases = []int{10, 20, 30, 40}
+var phases = []int{10, 20, 30}
 var lR = true
 var phaseLR = 1
 var endPhase time.Timer
