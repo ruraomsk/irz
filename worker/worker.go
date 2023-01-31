@@ -18,28 +18,28 @@ type NowState struct {
 	Phase  int
 }
 
-var oldDK pudge.DK
 var dk = pudge.DK{RDK: 5, FDK: 0, DDK: 4, EDK: 0, PDK: false, EEDK: 0, ODK: false, LDK: 0, FTUDK: 0, TDK: 0, FTSDK: 0, TTCDK: 0}
-var endDU time.Timer
+var endDUPhase time.Timer
+var toPlan chan data.StatusDevice
+var nowPlan = 0
 
 // var ctrlDU = time.Duration(60 * time.Second)
-var isDU = false
-var isPromtakt = false
+var isDUPhase = false
 
 func Worker() {
 	go device.Device()
+	toPlan = make(chan data.StatusDevice, 100)
+	endPlan = make(chan interface{})
 	data.ToDevice <- 12 //Кругом красный
 	dk.RDK = 9
 	dk.FDK = 12
 	data.DataValue.SetDK(dk)
-	oldDK = dk
 	data.ToServer <- 0
 	time.Sleep(3 * time.Second)
 	logger.Info.Print("КК закончили")
-	dk.FDK = 0
+	dk.FDK = 1
 	dk.RDK = 6
 	dk.DDK = data.USDK
-	oldDK = dk
 	data.DataValue.SetDK(dk)
 	if data.DataValue.Controller.Base {
 		data.ToDevice <- 0
@@ -47,8 +47,7 @@ func Worker() {
 	} else {
 		//Выбираем согласно планов
 		// но пока все равно в ЛР
-		data.ToDevice <- 0
-		data.ToServer <- 0
+		choicePlan()
 	}
 	tik := time.NewTicker(1 * time.Second)
 	logger.Info.Print("Начинаем основной цикл worker")
@@ -61,35 +60,41 @@ func Worker() {
 			case 5:
 				//Смена плана ПК
 				data.DataValue.SetPK(cmd.Parametr)
+				choicePlan()
 			case 6:
 				//Смена НК
 				data.DataValue.SetNK(cmd.Parametr)
+				choicePlan()
 			case 7:
 				//Смена CК
 				data.DataValue.SetCK(cmd.Parametr)
+				choicePlan()
 			case 9:
 				//Смена ДУ
 				data.DataValue.SetDU(cmd.Parametr)
-				if isDU {
+				dk = data.DataValue.GetDK()
+				if isDUPhase {
 					if cmd.Parametr != dk.FDK {
-						endDU.Stop()
-						isDU = false
+						endDUPhase.Stop()
+						isDUPhase = false
 					} else {
 						//Обновляем время удержания
-						endDU.Stop()
-						endDU = *time.NewTimer(time.Minute)
+						endDUPhase.Stop()
+						endDUPhase = *time.NewTimer(time.Minute)
 						continue
 					}
 				}
-				isPromtakt = false
+				if workplan {
+					stopPlan()
+				}
 				if cmd.Parametr != 9 {
 					if cmd.Parametr == 0 {
 						//Перевод в ЛР
-						if isDU {
-							endDU.Stop()
+						if isDUPhase {
+							endDUPhase.Stop()
 						}
-						isDU = false
-						dk.RDK = 6
+						isDUPhase = false
+						dk.RDK = 5
 						dk.FDK = 1
 						data.DataValue.SetDK(dk)
 						data.ToDevice <- 0
@@ -102,39 +107,36 @@ func Worker() {
 						data.ToServer <- 0
 						if cmd.Parametr < 9 {
 							//Держим фазу
-							isDU = true
-							endDU = *time.NewTimer(time.Minute)
+							isDUPhase = true
+							endDUPhase = *time.NewTimer(time.Minute)
 						}
 					}
 				} else {
 					//Выключаем ДУ производим выбор нового плана
-					// Но пока для  отладки снова врубаем ЛР
-					dk.RDK = 6
-					dk.FDK = 1
-					data.DataValue.SetDK(dk)
-					data.ToDevice <- 0
-					data.ToServer <- 0
+					choicePlan()
 				}
 			}
-		case <-endDU.C:
+		case <-endDUPhase.C:
 			//Перестали удерживать ДУ
 			data.Commands <- data.InternalCmd{Source: data.USDK, Command: 9, Parametr: 9}
 		case ars := <-data.Arrays:
-			logger.Debug.Print("Записываем привязку")
 			data.DataValue.SetArrays(ars)
-			logger.Debug.Print("Записали привязку")
+
+			if workplan {
+				stopPlan()
+			}
 			// Тут нужно все заново выбрать
+			choicePlan()
 		case <-tik.C:
-			// dk.TDK += 1
-			// dk.TTCDK += 1
-			// if isChangeDK() {
-			// 	data.DataValue.SetDK(dk)
-			// 	oldDK = dk
-			// 	data.ToServer <- 0
-			// }
+			//Выбираем план
+			choicePlan()
 		case dev := <-data.FromDevice:
-			dk = data.DataValue.Controller.DK
 			logger.Info.Printf("От устройства %v", dev)
+			dk = data.DataValue.GetDK()
+			if workplan {
+				toPlan <- dev
+			}
+			dk = data.DataValue.Controller.DK
 			dk.FDK = dev.Phase
 			dk.TTCDK = dev.TimeTC
 			dk.TDK = dev.TimeTU
@@ -150,31 +152,97 @@ func Worker() {
 		}
 	}
 }
-func isChangeDK() bool {
-	if oldDK.RDK != dk.RDK {
-		return true
+func choicePlan() {
+	if data.DataValue.Controller.StatusCommandDU.IsDUDK1 {
+		return
 	}
-	if oldDK.DDK != dk.DDK {
-		return true
-	}
-	if oldDK.EDK != dk.EDK {
-		return true
-	}
-	if oldDK.EEDK != dk.EEDK {
-		return true
-	}
-	if oldDK.FDK != dk.FDK {
-		return true
-	}
-	if oldDK.FTSDK != dk.FTSDK {
-		return true
-	}
-	if oldDK.LDK != dk.LDK {
-		return true
-	}
-	if oldDK.PDK != dk.PDK {
-		return true
-	}
-	return false
+	if data.DataValue.Controller.StatusCommandDU.IsPK {
+		if workplan && nowPlan == data.DataValue.CommandDU.PK {
+			return
+		}
+		if workplan {
+			stopPlan()
+		}
 
+		go goPlan(data.DataValue.CommandDU.PK)
+
+		return
+	}
+	data.DataValue.CommandDU.PK = 0
+	if data.DataValue.Controller.StatusCommandDU.IsCK {
+		data.DataValue.Controller.CK = data.DataValue.CommandDU.CK
+	} else {
+		data.DataValue.Controller.CK = 0
+	}
+	if data.DataValue.Controller.StatusCommandDU.IsNK {
+		data.DataValue.Controller.NK = data.DataValue.CommandDU.NK
+	} else {
+		data.DataValue.Controller.NK = 0
+	}
+	mes := time.Now().Month()
+	day := time.Now().Day()
+	nday := time.Now().Weekday()
+	hour := time.Now().Hour()
+	min := time.Now().Minute()
+	if data.DataValue.Controller.NK == 0 {
+		mk := 0
+		for _, v := range data.DataValue.Arrays.MonthSets.MonthSets {
+			if v.Number == int(mes) {
+				mk = v.Days[day-1]
+				break
+			}
+		}
+		data.DataValue.Controller.NK = mk
+	}
+	if data.DataValue.Controller.CK == 0 {
+		ck := 0
+		for _, v := range data.DataValue.Arrays.WeekSets.WeekSets {
+			if v.Number == int(data.DataValue.Controller.NK) {
+				ck = v.Days[nday-1]
+			}
+		}
+		data.DataValue.Controller.CK = ck
+	}
+	if data.DataValue.Controller.PK == 0 {
+		pk := 0
+		for _, v := range data.DataValue.Arrays.DaySets.DaySets {
+			if v.Number == int(data.DataValue.Controller.CK) {
+				for _, v := range v.Lines {
+					if hour < v.Hour {
+						pk = v.PKNom
+						break
+					} else {
+						if hour == v.Hour && min <= v.Min {
+							pk = v.PKNom
+							break
+						}
+					}
+				}
+				break
+			}
+		}
+		data.DataValue.Controller.PK = pk
+	}
+	if data.DataValue.Controller.PK == 0 {
+		//Все плохо свалимся в ЛР
+		if workplan {
+			stopPlan()
+		}
+		dk.FDK = 1
+		dk.RDK = 6
+		dk.DDK = data.USDK
+		data.DataValue.SetDK(dk)
+		data.ToDevice <- 0
+		data.ToServer <- 0
+		return
+	}
+	if workplan && nowPlan == data.DataValue.Controller.PK {
+		return
+	}
+	if workplan {
+		stopPlan()
+	}
+	go goPlan(data.DataValue.Controller.PK)
+	// logger.Info.Printf("%d %d %d:%d %d", mes, day, hour, min, nday)
+	// data.DataValue.Controller.NK=0
 }

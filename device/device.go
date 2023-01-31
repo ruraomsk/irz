@@ -43,7 +43,6 @@ func Device() {
 					makePromTakt()
 				}
 				lR = true
-
 				state.PhaseTC = phaseLR
 				state.PhaseTU = state.PhaseTC
 				state.Phase = phaseLR

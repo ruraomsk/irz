@@ -42,6 +42,6 @@ func initChans() {
 	Commands = make(chan InternalCmd, 100)
 	Arrays = make(chan binding.Arrays, 100)
 	ToServer = make(chan int, 1)
-	ToDevice = make(chan int, 1)
-	FromDevice = make(chan StatusDevice, 1)
+	ToDevice = make(chan int, 10)
+	FromDevice = make(chan StatusDevice, 10)
 }

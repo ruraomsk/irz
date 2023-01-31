@@ -178,6 +178,13 @@ func (c *Common) SetDK(dk pudge.DK) {
 	DataValue.change = true
 	mutex.Unlock()
 }
+func (c *Common) GetDK() pudge.DK {
+	mutex.Lock()
+	dk := DataValue.Controller.DK
+	DataValue.change = true
+	mutex.Unlock()
+	return dk
+}
 
 func LoadAll() {
 	pathCommon = setup.Set.SetupPudge.DbPath + "common.json"
