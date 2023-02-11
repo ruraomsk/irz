@@ -1,0 +1,49 @@
+package kdm
+
+import (
+	"time"
+
+	"github.com/goburrow/modbus"
+	"github.com/ruraomsk/ag-server/logger"
+	"github.com/ruraomsk/irz/setup"
+)
+
+var err error
+var handler *modbus.RTUClientHandler
+var client modbus.Client
+var results []byte
+
+func connect() {
+	handler = modbus.NewRTUClientHandler(setup.Set.Modbus.Device)
+	handler.BaudRate = setup.Set.Modbus.BaudRate
+	handler.DataBits = 8
+	handler.Parity = setup.Set.Modbus.Parity
+	handler.StopBits = 1
+	handler.SlaveId = byte(setup.Set.Modbus.UId)
+	handler.Timeout = 5 * time.Second
+
+	err = handler.Connect()
+	if err != nil {
+		logger.Error.Printf("error modbus %s", err.Error())
+		return
+	}
+	defer handler.Close()
+
+	client = modbus.NewClient(handler)
+}
+func readData() {
+	results, err = client.ReadHoldingRegisters(0, 0x1)
+	if err != nil {
+		logger.Error.Printf("error read modbus %s", err.Error())
+		return
+	}
+	logger.Info.Printf("read =%v", results)
+}
+
+func Kdm() {
+	connect()
+	for {
+		readData()
+		time.Sleep(5 * time.Second)
+	}
+}

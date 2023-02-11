@@ -13,6 +13,7 @@ import (
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/irz/comm"
 	"github.com/ruraomsk/irz/data"
+	"github.com/ruraomsk/irz/kdm"
 	"github.com/ruraomsk/irz/setup"
 	"github.com/ruraomsk/irz/worker"
 )
@@ -46,7 +47,7 @@ func main() {
 	data.LoadAll()
 	go worker.Worker()
 	go comm.ToServer()
-
+	go kdm.Kdm()
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
