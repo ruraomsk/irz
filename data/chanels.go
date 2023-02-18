@@ -1,6 +1,10 @@
 package data
 
-import "github.com/ruraomsk/ag-server/binding"
+import (
+	"fmt"
+
+	"github.com/ruraomsk/ag-server/binding"
+)
 
 type InternalCmd struct {
 	Source   int
@@ -21,10 +25,16 @@ type StatusDevice struct {
 	Phase   int  //Фаза плана
 	PhaseTU int  // Заданная фаза
 	PhaseTC int  // Текущая фаза
-	Door    bool // Открыта ди дверь
+	Door    bool // Открыта ли дверь
 	Lamp    int  // На какой фазе перегорели двери
 	TimeTU  int  // Время фазы ТУ
 	TimeTC  int  // Время фазы ТС
+	Connect bool // Есть ли связь с устройством
+
+}
+
+func (s *StatusDevice) ToString() string {
+	return fmt.Sprintf("Фаза %d ТУ %d ТС %d Время ТУ %d ТС %d", s.Phase, s.PhaseTU, s.PhaseTC, s.TimeTU, s.TimeTC)
 }
 
 func (s *StatusDevice) NewPhase() {

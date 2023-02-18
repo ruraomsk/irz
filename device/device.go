@@ -14,9 +14,10 @@ var lR = true
 var phaseLR = 1
 var endPhase time.Timer
 var tick = time.NewTicker(1 * time.Second)
-var state = data.StatusDevice{Door: false, Lamp: 0, Phase: 0, PhaseTC: 0, PhaseTU: 0}
+var state = data.StatusDevice{Door: false, Lamp: 0, Phase: 0, PhaseTC: 0, PhaseTU: 0, Connect: true}
 
 func Device() {
+	data.DataValue.Connect=true
 	if lR {
 		state.Phase = 1
 		state.PhaseTC = 1

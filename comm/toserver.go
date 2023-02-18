@@ -59,6 +59,7 @@ func ToServer() {
 		for work {
 			select {
 			case cmd := <-data.ToServer:
+				// logger.Info.Print("Просят по СФДК отправить")
 				// logger.Debug.Printf("Пришла команда %d", cmd)
 				if cmd == 1 { //Что то изменилось и нам нужно сообщить об этом
 					data.DataValue.SetLastOperation()

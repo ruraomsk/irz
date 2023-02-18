@@ -31,14 +31,14 @@ func waitTime(seconds int, phase int) error {
 	count := 0
 	data.ToDevice <- phase
 	data.ToServer <- 0
-	logger.Info.Printf("Исплняем фаза %d плана %d длительность %d", phase, nowPlan, seconds)
+	logger.Info.Printf("Исполняем фаза %d плана %d длительность %d", phase, nowPlan, seconds)
 	for {
 		select {
 		case <-tick.C:
 			if !workplan {
 				return fmt.Errorf("end work")
 			}
-			if state.PhaseTU != state.PhaseTU {
+			if state.PhaseTU != state.PhaseTC {
 				count++
 				if count > notCmdControl {
 					return nil
@@ -53,9 +53,7 @@ func waitTime(seconds int, phase int) error {
 	}
 }
 func goPlan(pl int) {
-	workplan = true
 	nowPlan = pl
-	defer exitPlan()
 
 	var pk = binding.SetPk{Pk: 0}
 	for _, v := range data.DataValue.Arrays.SetDK.DK {
@@ -68,6 +66,8 @@ func goPlan(pl int) {
 		return
 	}
 	//Выполнение простого плана
+	workplan = true
+	defer exitPlan()
 	logger.Info.Printf("Выполняем план %d", pk.Pk)
 	data.DataValue.Controller.PK = pl
 	if pk.Tc == 0 {
@@ -97,7 +97,11 @@ func goPlan(pl int) {
 	}
 	if pk.TypePU != 1 {
 		logger.Error.Printf("Пока только ЛПУ!")
-		return
+		for {
+			if waitTime(10000, 0) != nil {
+				return
+			}
+		}
 	}
 	for {
 
@@ -108,8 +112,8 @@ func goPlan(pl int) {
 			if waitTime(v.Stop-v.Start, v.Number) != nil {
 				return
 			}
-			if state.PhaseTC != state.PhaseTU {
-				logger.Error.Printf("Неподчинение фазы %d приходит %d", v.Number, state.PhaseTC)
+			if v.Number != state.PhaseTU {
+				logger.Error.Printf("Неподчинение фазы %d приходит %d", v.Number, state.PhaseTU)
 			}
 		}
 	}

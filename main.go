@@ -13,6 +13,7 @@ import (
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/irz/comm"
 	"github.com/ruraomsk/irz/data"
+	"github.com/ruraomsk/irz/device"
 	"github.com/ruraomsk/irz/kdm"
 	"github.com/ruraomsk/irz/setup"
 	"github.com/ruraomsk/irz/worker"
@@ -46,8 +47,13 @@ func main() {
 	logger.Info.Println("iRZ start")
 	data.LoadAll()
 	go worker.Worker()
+	// go kdm.KdmTest()
 	go comm.ToServer()
-	go kdm.Kdm()
+	if setup.Set.Immitator {
+		go device.Device()
+	} else {
+		go kdm.Kdm()
+	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c

@@ -7,6 +7,7 @@ var (
 type Setup struct {
 	LogPath    string     `toml:"logpath"`
 	ID         int        `toml:"id"`
+	Immitator  bool       `toml:"immitator"`
 	Server     Server     `toml:"server"`
 	Modbus     Modbus     `toml:"modbus"`
 	SetupPudge SetupPudge `toml:"pudge"`

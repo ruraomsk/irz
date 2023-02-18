@@ -6,7 +6,6 @@ import (
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/irz/data"
-	"github.com/ruraomsk/irz/device"
 )
 
 type NowState struct {
@@ -27,18 +26,16 @@ var nowPlan = 0
 var isDUPhase = false
 
 func Worker() {
-	go device.Device()
 	toPlan = make(chan data.StatusDevice, 100)
 	endPlan = make(chan interface{})
-	data.ToDevice <- 12 //Кругом красный
-	dk.RDK = 9
-	dk.FDK = 12
-	data.DataValue.SetDK(dk)
-	data.ToServer <- 0
-	time.Sleep(3 * time.Second)
-	logger.Info.Print("КК закончили")
+	for !data.DataValue.Connect {
+		dk.EDK = 11
+		dk.DDK = 8
+		data.DataValue.SetDK(dk)
+		time.Sleep(1 * time.Second)
+	}
+	dk.EDK = 0
 	dk.FDK = 1
-	dk.RDK = 6
 	dk.DDK = data.USDK
 	data.DataValue.SetDK(dk)
 	if data.DataValue.Controller.Base {
@@ -129,17 +126,27 @@ func Worker() {
 			choicePlan()
 		case <-tik.C:
 			//Выбираем план
+			for !data.DataValue.Connect {
+				for !data.DataValue.Connect {
+					dk.EDK = 11
+					dk.DDK = 8
+					data.DataValue.SetDK(dk)
+					data.ToDevice <- 0
+					time.Sleep(1 * time.Second)
+				}
+			}
 			choicePlan()
 		case dev := <-data.FromDevice:
-			logger.Info.Printf("От устройства %v", dev)
+			logger.Info.Printf("От устройства %s", dev.ToString())
+			// data.DataValue.Connect = dev.Connect
 			dk = data.DataValue.GetDK()
 			if workplan {
 				toPlan <- dev
 			}
-			dk = data.DataValue.Controller.DK
 			dk.FDK = dev.Phase
 			dk.TTCDK = dev.TimeTC
-			dk.TDK = dev.TimeTU
+			// dk.TDK = dev.TimeTU
+			dk.TDK = 0
 			dk.FTSDK = dev.PhaseTC
 			dk.FTUDK = dev.PhaseTU
 			if dk.RDK == 5 || dk.RDK == 6 {
@@ -192,6 +199,7 @@ func choicePlan() {
 				break
 			}
 		}
+		// logger.Debug.Printf("find NK %d", mk)
 		data.DataValue.Controller.NK = mk
 	}
 	if data.DataValue.Controller.CK == 0 {
@@ -201,6 +209,7 @@ func choicePlan() {
 				ck = v.Days[nday-1]
 			}
 		}
+		// logger.Debug.Printf("find CK %d", ck)
 		data.DataValue.Controller.CK = ck
 	}
 	if data.DataValue.Controller.PK == 0 {
@@ -221,6 +230,8 @@ func choicePlan() {
 				break
 			}
 		}
+		// logger.Debug.Printf("find PK %d", pk)
+
 		data.DataValue.Controller.PK = pk
 	}
 	if data.DataValue.Controller.PK == 0 {
@@ -230,6 +241,7 @@ func choicePlan() {
 		}
 		dk.FDK = 1
 		dk.RDK = 6
+		dk.EDK = 4
 		dk.DDK = data.USDK
 		data.DataValue.SetDK(dk)
 		data.ToDevice <- 0

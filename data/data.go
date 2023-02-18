@@ -34,6 +34,7 @@ type Common struct {
 	change     bool
 	CommandDU  CommandDU
 	Server     Server
+	Connect    bool
 }
 
 func (c *Common) setEmpty() {
