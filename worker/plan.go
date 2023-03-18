@@ -14,8 +14,10 @@ var endPlan chan (interface{})
 var notCmdControl = 10 * 10
 
 func stopPlan() {
-	workplan = false
-	<-endPlan
+	if workplan {
+		workplan = false
+		<-endPlan
+	}
 }
 func exitPlan() {
 	endPlan <- 0

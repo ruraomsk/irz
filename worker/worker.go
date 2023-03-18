@@ -21,6 +21,7 @@ var dk = pudge.DK{RDK: 5, FDK: 0, DDK: 4, EDK: 0, PDK: false, EEDK: 0, ODK: fals
 var endDUPhase time.Timer
 var toPlan chan data.StatusDevice
 var nowPlan = 0
+var prom = 0
 
 // var ctrlDU = time.Duration(60 * time.Second)
 var isDUPhase = false
@@ -68,6 +69,7 @@ func Worker() {
 				choicePlan()
 			case 9:
 				//Смена ДУ
+				stopPlan()
 				data.DataValue.SetDU(cmd.Parametr)
 				dk = data.DataValue.GetDK()
 				if isDUPhase {
@@ -81,9 +83,7 @@ func Worker() {
 						continue
 					}
 				}
-				if workplan {
-					stopPlan()
-				}
+				stopPlan()
 				if cmd.Parametr != 9 {
 					if cmd.Parametr == 0 {
 						//Перевод в ЛР
@@ -119,9 +119,7 @@ func Worker() {
 		case ars := <-data.Arrays:
 			data.DataValue.SetArrays(ars)
 
-			if workplan {
-				stopPlan()
-			}
+			stopPlan()
 			// Тут нужно все заново выбрать
 			choicePlan()
 		case <-tik.C:
@@ -144,10 +142,17 @@ func Worker() {
 				toPlan <- dev
 			}
 			dk.FDK = dev.Phase
-			dk.TTCDK = dev.TimeTC
-			// dk.TDK = dev.TimeTU
-			dk.TDK = 0
+			if dev.Phase == 9 {
+				dk.TDK = 0
+			} else {
+				prom = dev.TimeTC
+				dk.TDK = dev.TimeTU
+			}
 			dk.FTSDK = dev.PhaseTC
+			dk.TTCDK = dev.TimeTC
+			if dev.Phase == 9 {
+				dk.TTCDK = dev.TimeTU - prom
+			}
 			dk.FTUDK = dev.PhaseTU
 			if dk.RDK == 5 || dk.RDK == 6 {
 				dk.FTUDK = 0
@@ -167,9 +172,7 @@ func choicePlan() {
 		if workplan && nowPlan == data.DataValue.CommandDU.PK {
 			return
 		}
-		if workplan {
-			stopPlan()
-		}
+		stopPlan()
 
 		go goPlan(data.DataValue.CommandDU.PK)
 
@@ -236,9 +239,7 @@ func choicePlan() {
 	}
 	if data.DataValue.Controller.PK == 0 {
 		//Все плохо свалимся в ЛР
-		if workplan {
-			stopPlan()
-		}
+		stopPlan()
 		dk.FDK = 1
 		dk.RDK = 6
 		dk.EDK = 4
@@ -251,10 +252,6 @@ func choicePlan() {
 	if workplan && nowPlan == data.DataValue.Controller.PK {
 		return
 	}
-	if workplan {
-		stopPlan()
-	}
+	stopPlan()
 	go goPlan(data.DataValue.Controller.PK)
-	// logger.Info.Printf("%d %d %d:%d %d", mes, day, hour, min, nday)
-	// data.DataValue.Controller.NK=0
 }

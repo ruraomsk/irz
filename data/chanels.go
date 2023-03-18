@@ -34,7 +34,7 @@ type StatusDevice struct {
 }
 
 func (s *StatusDevice) ToString() string {
-	return fmt.Sprintf("Фаза %d ТУ %d ТС %d Время ТУ %d ТС %d", s.Phase, s.PhaseTU, s.PhaseTC, s.TimeTU, s.TimeTC)
+	return fmt.Sprintf("Фаза %d ТУ %d ТС %d Время ТC %d ТУ %d", s.Phase, s.PhaseTU, s.PhaseTC, s.TimeTC, s.TimeTU)
 }
 
 func (s *StatusDevice) NewPhase() {

@@ -80,6 +80,7 @@ func workModbus() {
 	}
 
 	state.PhaseTC = 0
+	state.PhaseTU = 0
 	state.Phase = 0
 	var tick = time.NewTicker(1 * time.Second)
 	for {
@@ -94,38 +95,14 @@ func workModbus() {
 			if state.TimeTC > 255 {
 				state.TimeTC = 0
 			}
+			if state.TimeTU > 255 {
+				state.TimeTU = 0
+			}
 			err = getStatus()
 			if err != nil {
 				logger.Error.Print(err.Error())
 				return
 			}
-			// if state.PhaseTC != 0 {
-			// 	if statusKdm.Phase == 9 {
-			// 		if !sendpromtakt {
-			// 			state.Phase = 9
-			// 			state.PhaseTU = statusKdm.PhaseTU
-			// 			state.PhaseTC = statusKdm.PhaseTU
-			// 			data.FromDevice <- state
-			// 			state.Phase = statusKdm.PhaseTU
-			// 			state.NewPhase()
-			// 			sendpromtakt = true
-			// 			sendphase = false
-			// 		}
-			// 	}
-			// 	if statusKdm.Phase != 9 {
-			// 		if !sendphase {
-			// 			state.Phase = statusKdm.Phase
-			// 			state.PhaseTU = statusKdm.PhaseTU
-			// 			state.PhaseTC = statusKdm.PhaseTU
-			// 			data.FromDevice <- state
-			// 			state.TimeTU = 0
-			// 			sendphase = true
-			// 			sendpromtakt = false
-			// 		}
-			// 	}
-			// 	continue
-			// }
-			// logger.Info.Printf("От устройства фаза %d %v %v", statusKdm.Phase, sendpromtakt, sendphase)
 			if statusKdm.Phase == 9 {
 				if !savepromtakt {
 					state.Phase = 9
@@ -133,25 +110,25 @@ func workModbus() {
 					savestate = state
 					// data.FromDevice <- state
 					state.Phase = statusKdm.PhaseTU
-					state.NewPhase()
 					savepromtakt = true
 					sendphase = false
 					sendpromtakt = false
 				}
-				if statusKdm.PhaseTU != savestate.PhaseTU && !sendpromtakt {
-					savestate.PhaseTU = statusKdm.PhaseTU
-					sendpromtakt = true
-					data.FromDevice <- savestate
-				}
+			}
+			if statusKdm.PhaseTU != savestate.PhaseTU && !sendpromtakt {
+				savestate.PhaseTU = statusKdm.PhaseTU
+				sendpromtakt = true
+				savestate.TimeTC = state.TimeTC - savestate.TimeTC
+				data.FromDevice <- savestate
+				state.TimeTU = state.TimeTU - savestate.TimeTU
+				state.TimeTC = 0
+
 			}
 			if statusKdm.Phase != 9 {
-				savepromtakt = false
 				if !sendphase {
 					state.Phase = statusKdm.Phase
 					state.PhaseTU = statusKdm.PhaseTU
 					data.FromDevice <- state
-					// state.TimeTU = 0
-					state.TimeTC = 0
 					sendphase = true
 					savepromtakt = false
 				}
@@ -177,6 +154,7 @@ func workModbus() {
 					return
 				}
 				state.PhaseTC = 0
+				state.PhaseTU = 0
 			case 10:
 				//ЖМ
 				newSending()
@@ -205,7 +183,7 @@ func workModbus() {
 				data.FromDevice <- state
 			default:
 				if in > 0 && in < 9 {
-					newSending()
+					// newSending()
 					state.PhaseTC = in
 					err = setPhase(in)
 					if err != nil {
