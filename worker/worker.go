@@ -215,28 +215,26 @@ func choicePlan() {
 		// logger.Debug.Printf("find CK %d", ck)
 		data.DataValue.Controller.CK = ck
 	}
-	if data.DataValue.Controller.PK == 0 {
-		pk := 0
-		for _, v := range data.DataValue.Arrays.DaySets.DaySets {
-			if v.Number == int(data.DataValue.Controller.CK) {
-				for _, v := range v.Lines {
-					if hour < v.Hour {
+	pk := 0
+	for _, v := range data.DataValue.Arrays.DaySets.DaySets {
+		if v.Number == int(data.DataValue.Controller.CK) {
+			for _, v := range v.Lines {
+				if hour < v.Hour {
+					pk = v.PKNom
+					break
+				} else {
+					if hour == v.Hour && min <= v.Min {
 						pk = v.PKNom
 						break
-					} else {
-						if hour == v.Hour && min <= v.Min {
-							pk = v.PKNom
-							break
-						}
 					}
 				}
-				break
 			}
+			break
 		}
-		// logger.Debug.Printf("find PK %d", pk)
-
-		data.DataValue.Controller.PK = pk
 	}
+	// logger.Debug.Printf("find PK %d", pk)
+
+	data.DataValue.Controller.PK = pk
 	if data.DataValue.Controller.PK == 0 {
 		//Все плохо свалимся в ЛР
 		stopPlan()
