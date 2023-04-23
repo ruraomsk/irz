@@ -4,6 +4,8 @@ github.com/goburrow/serial v0.1.0 h1:v2T1SQa/dlUqQiYIT8+Cu7YolfqAi3K96UmhwYyuSrA
 github.com/goburrow/serial v0.1.0/go.mod h1:sAiqG0nRVswsm1C97xsttiYCzSLBmUZ/VSlVLZJ8haA=
 github.com/lib/pq v1.10.5 h1:J+gdV2cUmX7ZqL2B0lFcW0m+egaHC2V3lpO8nWxyYiQ=
 github.com/lib/pq v1.10.5/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+github.com/robfig/cron/v3 v3.0.1 h1:WdRxkvbJztn8LMz/QEvLN5sBU+xKpSqwwUO1Pjr4qDs=
+github.com/robfig/cron/v3 v3.0.1/go.mod h1:eQICP3HwyT7UooqI/z+Ov+PtYAWygg1TEWWzGIFLtro=
 github.com/ruraomsk/ag-server v0.0.0-20230120071634-ec939e35c883 h1:YOJD4+bo097y/omyQikILx/ANkWpupuUoyCkJnCm+uM=
 github.com/ruraomsk/ag-server v0.0.0-20230120071634-ec939e35c883/go.mod h1:MpuTy+cjEIJ11T6mZ8/WWQS/RdnowVzDoEO9Mwyin0o=
 github.com/simonvetter/modbus v1.6.0 h1:RDHJevtc7LDIVoHAbhDun8fy+QwnGe+ZU+sLm9ZZzjc=

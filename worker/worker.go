@@ -83,7 +83,6 @@ func Worker() {
 						continue
 					}
 				}
-				stopPlan()
 				if cmd.Parametr != 9 {
 					if cmd.Parametr == 0 {
 						//Перевод в ЛР
@@ -110,6 +109,13 @@ func Worker() {
 					}
 				} else {
 					//Выключаем ДУ производим выбор нового плана
+					if isDUPhase {
+						endDUPhase.Stop()
+					}
+					isDUPhase = false
+					dk.RDK = 8
+					data.DataValue.SetDK(dk)
+					// data.ToServer <- 0
 					choicePlan()
 				}
 			}
@@ -192,6 +198,9 @@ func choicePlan() {
 	mes := time.Now().Month()
 	day := time.Now().Day()
 	nday := time.Now().Weekday()
+	if nday == 0 {
+		nday = 7
+	}
 	hour := time.Now().Hour()
 	min := time.Now().Minute()
 	if data.DataValue.Controller.NK == 0 {
@@ -237,6 +246,7 @@ func choicePlan() {
 	data.DataValue.Controller.PK = pk
 	if data.DataValue.Controller.PK == 0 {
 		//Все плохо свалимся в ЛР
+		logger.Error.Println("плохо свалимся в ЛР")
 		stopPlan()
 		dk.FDK = 1
 		dk.RDK = 6
@@ -251,5 +261,9 @@ func choicePlan() {
 		return
 	}
 	stopPlan()
+	dk.RDK = 8
+	data.DataValue.SetDK(dk)
+	// data.ToServer <- 0
+
 	go goPlan(data.DataValue.Controller.PK)
 }

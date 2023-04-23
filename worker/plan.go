@@ -30,12 +30,16 @@ func waitTime(seconds int, phase int) error {
 	data.DataValue.SetDK(dk)
 	tick := time.NewTicker(100 * time.Millisecond)
 	endphase := time.NewTimer(time.Duration(seconds) * time.Second)
+	repeat := time.NewTicker(time.Minute)
 	count := 0
 	data.ToDevice <- phase
 	data.ToServer <- 0
+
 	logger.Info.Printf("Исполняем фаза %d плана %d длительность %d", phase, nowPlan, seconds)
 	for {
 		select {
+		case <-repeat.C:
+			data.ToDevice <- phase
 		case <-tick.C:
 			if !workplan {
 				return fmt.Errorf("end work")
@@ -68,6 +72,9 @@ func goPlan(pl int) {
 		return
 	}
 	//Выполнение простого плана
+
+	dk.EDK = 0
+	data.DataValue.SetDK(dk)
 	workplan = true
 	defer exitPlan()
 	logger.Info.Printf("Выполняем план %d", pk.Pk)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ruraomsk/ag-server/binding"
+	"github.com/ruraomsk/ag-server/pudge"
 )
 
 type InternalCmd struct {
@@ -42,11 +43,15 @@ func (s *StatusDevice) NewPhase() {
 	s.TimeTU = 0
 }
 
+var QAInfo chan QInfo
+var AInfo chan bool
+
 var Commands chan InternalCmd
 var Arrays chan binding.Arrays
 var ToServer chan int
 var ToDevice chan int
 var FromDevice chan StatusDevice
+var Statistics chan pudge.Statistic
 
 func initChans() {
 	Commands = make(chan InternalCmd, 100)
@@ -54,4 +59,8 @@ func initChans() {
 	ToServer = make(chan int, 1)
 	ToDevice = make(chan int, 10)
 	FromDevice = make(chan StatusDevice, 10)
+	Statistics = make(chan pudge.Statistic, 10)
+	QAInfo = make(chan QInfo)
+	AInfo = make(chan bool)
+
 }

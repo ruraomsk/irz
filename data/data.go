@@ -17,6 +17,11 @@ var mutex sync.Mutex
 var DataValue Common
 var pathCommon string
 
+type QInfo struct {
+	TypeDev  int
+	Interval int
+}
+
 type CommandDU struct {
 	PK int
 	CK int

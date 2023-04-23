@@ -16,6 +16,7 @@ import (
 	"github.com/ruraomsk/irz/device"
 	"github.com/ruraomsk/irz/kdm"
 	"github.com/ruraomsk/irz/setup"
+	"github.com/ruraomsk/irz/stat"
 	"github.com/ruraomsk/irz/worker"
 )
 
@@ -54,6 +55,7 @@ func main() {
 	} else {
 		go kdm.Kdm()
 	}
+	go stat.Statistics()
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
