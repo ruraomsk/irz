@@ -26,7 +26,7 @@ type ReplayCtrl struct {
 func (c *ctrl) clearOld() {
 	values := make([]Value, 0)
 	for _, v := range c.values {
-		if time.Now().Sub(v.Time).Seconds() < c.len {
+		if time.Since(v.Time).Seconds() < c.len {
 			values = append(values, v)
 		}
 	}
@@ -49,7 +49,7 @@ func (c *ctrl) SetGood() {
 		c.good = true
 		return
 	}
-	if time.Now().Sub(c.last.Time).Seconds() > c.len {
+	if time.Since(c.last.Time).Seconds() > c.len {
 		// logger.Debug.Printf("Обрыв либо долго не жмут")
 		c.good = false
 		return

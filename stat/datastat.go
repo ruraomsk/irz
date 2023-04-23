@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
+	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/irz/data"
 )
 
@@ -85,12 +86,13 @@ func (Ch *Chanels) ClearInfo() {
 func (ch *OneChanel) AddInfo(tick OneTick) {
 	ch.Last = tick.Value
 	ch.Values = append(ch.Values, tick.Value)
+	logger.Debug.Printf("%v", tick)
 }
 func (ch *OneChanel) GetInfo(interval int) bool {
 	if ch.Last.Status != 0 {
 		return true
 	}
-	if time.Now().Sub(ch.Last.Time).Seconds() <= float64(interval) {
+	if time.Since(ch.Last.Time).Seconds() <= float64(interval) {
 		return true
 	}
 	return false
