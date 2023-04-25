@@ -2,7 +2,7 @@ logpath="log/"
 # id=198460			#Номер устройства
 # id=230412
 id=108682
-immitator=false     #если истина то запускать имитатор 
+immitator=true     #если истина то запускать имитатор 
 [modbus]
 	# device="rtu:///dev/ttyUSB0"
 	device="rtu:///dev/ttyEXTRA2_00"

@@ -90,7 +90,7 @@ func goPlan(pl int) {
 	if pk.Tc == 1 {
 		//ЖМ
 		for {
-			if waitTime(10000, 10) != nil {
+			if waitTime(9999999, 10) != nil {
 				return
 			}
 		}
@@ -98,32 +98,54 @@ func goPlan(pl int) {
 	}
 	if pk.Tc == 2 {
 		for {
-			if waitTime(10000, 11) != nil {
+			if waitTime(9999999, 11) != nil {
 				return
 			}
 		}
 
 	}
+	ctrl := buildControl(pk)
 	if pk.TypePU != 1 {
 		logger.Error.Printf("Пока только ЛПУ!")
 		for {
-			if waitTime(10000, 0) != nil {
+			if waitTime(9999999, 0) != nil {
 				return
 			}
 		}
 	}
-	for {
+	flagP := true //Флаг переходной фазы
+	dk.PDK = true
+	data.DataValue.SetDK(dk)
 
+	for {
+		if flagP {
+			startCycle <- ctrl
+		}
 		for _, v := range pk.Stages {
 			if v.Start == 0 && v.Stop == 0 {
 				continue
 			}
-			if waitTime(v.Stop-v.Start, v.Number) != nil {
-				return
+			if v.Tf == 0 {
+				if waitTime(v.Stop-v.Start, v.Number) != nil {
+
+					return
+				}
+				if v.Number != state.PhaseTU {
+					logger.Error.Printf("Неподчинение фазы %d приходит %d", v.Number, state.PhaseTU)
+				}
 			}
-			if v.Number != state.PhaseTU {
-				logger.Error.Printf("Неподчинение фазы %d приходит %d", v.Number, state.PhaseTU)
+		}
+		if flagP {
+			stop <- 0
+			t := <-getControl
+			if t.isGood() {
+				flagP = false
+				dk.PDK = false
+				data.DataValue.SetDK(dk)
 			}
 		}
 	}
+}
+func buildControl(pk binding.SetPk) control {
+	return control{plans: make([]ctrlPlan, 0), lenght: pk.Tc}
 }
