@@ -155,18 +155,37 @@ func repackPlan(pk binding.SetPk) binding.SetPk {
 	newPk := pk
 	newPk.Stages = make([]binding.Stage, 0)
 	//Находим начальную фазу
-	// pos := 0
+	last := 0
 	for _, v := range pk.Stages {
-		if v.Start < pk.Shift {
-			if v.Dt == 0 && !v.Plus && !v.Trs {
-				v.Start += pk.Shift
-				v.Stop -= pk.Shift
-
-			}
+		if v.Start == 0 && v.Stop == 0 {
+			continue
 		}
-		v.Start -= pk.Shift
-		v.Stop -= pk.Shift
-		newPk.Stages = append(newPk.Stages, v)
+		if v.Start < pk.Shift {
+			r := v.Stop - v.Start
+			v.Start = last
+			v.Stop = last + r
+			if v.Trs {
+				v.Stop += v.Dt
+			}
+			if v.Tf == 0 {
+				last = v.Stop
+			} else {
+				last = v.Start
+			}
+			newPk.Stages = append(newPk.Stages, v)
+		} else {
+			v.Start -= pk.Shift
+			v.Stop -= pk.Shift
+			if v.Trs {
+				v.Stop += v.Dt
+			}
+			if v.Tf == 0 {
+				last = v.Stop
+			} else {
+				last = v.Start
+			}
+			newPk.Stages = append(newPk.Stages, v)
+		}
 	}
 	logger.Info.Printf("out %s", toSting(newPk))
 	return newPk
