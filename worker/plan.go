@@ -104,15 +104,8 @@ func goPlan(pl int) {
 		}
 
 	}
+	pk = repackPlan(pk)
 	ctrl := buildControl(pk)
-	if pk.TypePU != 1 {
-		logger.Error.Printf("Пока только ЛПУ!")
-		for {
-			if waitTime(9999999, 0) != nil {
-				return
-			}
-		}
-	}
 	flagP := true //Флаг переходной фазы
 	dk.PDK = true
 	data.DataValue.SetDK(dk)
@@ -148,4 +141,45 @@ func goPlan(pl int) {
 }
 func buildControl(pk binding.SetPk) control {
 	return control{plans: make([]ctrlPlan, 0), lenght: pk.Tc}
+}
+func repackPlan(pk binding.SetPk) binding.SetPk {
+	logger.Info.Printf("in %s", toSting(pk))
+	if pk.TypePU == 1 {
+		logger.Info.Printf("План локальный ничего не меняем")
+		return pk
+	}
+	if pk.Shift == 0 {
+		logger.Info.Printf("План координированный смещение 0")
+		return pk
+	}
+	newPk := pk
+	newPk.Stages = make([]binding.Stage, 0)
+	//Находим начальную фазу
+	// pos := 0
+	for _, v := range pk.Stages {
+		if v.Start < pk.Shift {
+			if v.Dt == 0 && !v.Plus && !v.Trs {
+				v.Start += pk.Shift
+				v.Stop -= pk.Shift
+
+			}
+		}
+		v.Start -= pk.Shift
+		v.Stop -= pk.Shift
+		newPk.Stages = append(newPk.Stages, v)
+	}
+	logger.Info.Printf("out %s", toSting(newPk))
+	return newPk
+}
+func toSting(pk binding.SetPk) string {
+	res := fmt.Sprintf("len=%d {", pk.Shift)
+	for _, v := range pk.Stages {
+		if v.Start == 0 && v.Stop == 0 {
+			continue
+		}
+		res += fmt.Sprintf("[%d-%d f=%d t=%d dt=%v pl=%v trs=%v]", v.Start, v.Stop, v.Number, v.Tf, v.Dt, v.Plus, v.Trs)
+	}
+	res += "}"
+	return res
+
 }
