@@ -106,12 +106,12 @@ func goPlan(pl int) {
 	}
 	pk = repackPlan(pk)
 	ctrl := buildControl(pk)
-	flagP := true //Флаг переходной фазы
+	flagP := 3 //Флаг переходной фазы
 	dk.PDK = true
 	data.DataValue.SetDK(dk)
 
 	for {
-		if flagP {
+		if flagP > 0 {
 			startCycle <- ctrl
 		}
 		for _, v := range pk.Stages {
@@ -128,11 +128,12 @@ func goPlan(pl int) {
 				}
 			}
 		}
-		if flagP {
+		flagP--
+		if flagP == 0 {
 			stop <- 0
 			t := <-getControl
 			if t.isGood() {
-				flagP = false
+				flagP = 3
 				dk.PDK = false
 				data.DataValue.SetDK(dk)
 			}
@@ -154,44 +155,63 @@ func repackPlan(pk binding.SetPk) binding.SetPk {
 	}
 	newPk := pk
 	newPk.Stages = make([]binding.Stage, 0)
+	tail := make([]binding.Stage, 0)
 	//Находим начальную фазу
-	last := 0
-	for _, v := range pk.Stages {
+	skip := false
+	for i, v := range pk.Stages {
+		if skip {
+			skip = false
+			continue
+		}
 		if v.Start == 0 && v.Stop == 0 {
 			continue
 		}
+		if v.Stop < v.Start {
+			continue
+		}
 		if v.Start < pk.Shift {
-			r := v.Stop - v.Start
-			v.Start = last
-			v.Stop = last + r
-			if v.Trs {
-				v.Stop += v.Dt
+			v.Start += pk.Tc - pk.Shift
+			v.Stop += pk.Tc - pk.Shift
+			tail = append(tail, v)
+			continue
+		}
+		v.Start -= pk.Shift
+		v.Stop -= pk.Shift
+		var dv binding.Stage
+		if isTVP(v.Tf) {
+			if i < len(pk.Stages) && !isZAM(pk.Stages[i+1].Tf) {
+				logger.Error.Printf("В плане координации %d нарушена структура", pk.Pk)
+				return newPk
 			}
-			if v.Tf == 0 {
-				last = v.Stop
-			} else {
-				last = v.Start
+			//Блок основная замещающая
+			skip = true
+			dv = pk.Stages[i+1]
+			if dv.Trs {
+				dv.Start -= pk.Shift
+				r := v.Stop - v.Start
+				v.Stop = v.Start + dv.Dt + r
+				dv.Stop = dv.Start + dv.Dt + r
 			}
-			newPk.Stages = append(newPk.Stages, v)
+
 		} else {
-			v.Start -= pk.Shift
-			v.Stop -= pk.Shift
+			//обычные фазы
 			if v.Trs {
-				v.Stop += v.Dt
+				r := v.Stop - v.Start
+				v.Stop = v.Start + v.Dt + r
 			}
-			if v.Tf == 0 {
-				last = v.Stop
-			} else {
-				last = v.Start
-			}
-			newPk.Stages = append(newPk.Stages, v)
+		}
+
+		newPk.Stages = append(newPk.Stages, v)
+		if skip {
+			newPk.Stages = append(newPk.Stages, dv)
 		}
 	}
+	newPk.Stages = append(newPk.Stages, tail...)
 	logger.Info.Printf("out %s", toSting(newPk))
 	return newPk
 }
 func toSting(pk binding.SetPk) string {
-	res := fmt.Sprintf("len=%d {", pk.Shift)
+	res := fmt.Sprintf("shift=%d {", pk.Shift)
 	for _, v := range pk.Stages {
 		if v.Start == 0 && v.Stop == 0 {
 			continue
@@ -201,4 +221,38 @@ func toSting(pk binding.SetPk) string {
 	res += "}"
 	return res
 
+}
+func isTVP(tf int) bool {
+	// Tf     int `json:"tf"`    //Тип фазы 0 -простая
+	// 1 - МГР
+	// 2 - 1ТВП
+	// 3 - 2ТВП
+	// 4 - 1,2ТВП
+	// 5 - Зам 1 ТВП
+	// 6 - Зам 2 ТВП
+	// 7 - Зам
+	// 8 - МДК
+	// 9 - ВДК
+
+	if tf == 2 || tf == 3 || tf == 4 {
+		return true
+	}
+	return false
+}
+func isZAM(tf int) bool {
+	// Tf     int `json:"tf"`    //Тип фазы 0 -простая
+	// 1 - МГР
+	// 2 - 1ТВП
+	// 3 - 2ТВП
+	// 4 - 1,2ТВП
+	// 5 - Зам 1 ТВП
+	// 6 - Зам 2 ТВП
+	// 7 - Зам
+	// 8 - МДК
+	// 9 - ВДК
+
+	if tf == 5 || tf == 6 || tf == 7 {
+		return true
+	}
+	return false
 }

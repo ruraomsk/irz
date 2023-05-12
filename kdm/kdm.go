@@ -42,6 +42,7 @@ var lastcmd = -1
 func Kdm() {
 	statusKdm.SetKeys = make([]uint16, 32)
 	for !state.Connect {
+		data.DataValue.Connect = false
 		time.Sleep(time.Second)
 		// for an RTU (serial) device/bus
 		client, err = modbus.NewClient(&modbus.ClientConfiguration{
@@ -68,6 +69,7 @@ func Kdm() {
 		data.DataValue.Connect = true
 		state.Connect = true
 		workModbus()
+		data.DataValue.Connect = false
 		state.Connect = false
 		data.FromDevice <- state
 	}

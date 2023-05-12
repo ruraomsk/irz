@@ -224,7 +224,7 @@ func LoadAll() {
 	DataValue.SetConnected(false)
 	DataValue.Controller.GPS.Ok = true
 	DataValue.Controller.Status.Ethernet = true
-
+	DataValue.Connect = false
 	initChans()
 
 	go run()

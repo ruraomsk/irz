@@ -34,7 +34,7 @@ var stop chan interface{}
 var getControl chan control
 var isGood chan bool
 
-func cintrollerPlans() {
+func controllerPlans() {
 	chanCtrl = make(chan data.StatusDevice)
 	startCycle = make(chan control)
 	stop = make(chan interface{})
