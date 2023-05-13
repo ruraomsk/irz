@@ -189,6 +189,7 @@ func choicePlan() {
 			dk.RDK = 8
 			data.DataValue.SetDK(dk)
 			go goPlan(data.DataValue.Controller.PK)
+			time.Sleep(time.Second)
 		} else {
 			hour := time.Now().Hour()
 			min := time.Now().Minute()
@@ -210,6 +211,7 @@ func choicePlan() {
 			data.DataValue.Controller.PK = data.DataValue.CommandDU.PK
 			data.DataValue.SetDK(dk)
 			go goPlan(data.DataValue.Controller.PK)
+			time.Sleep(time.Second)
 		}
 
 		return
@@ -305,6 +307,7 @@ func choicePlan() {
 		dk.RDK = 8
 		data.DataValue.SetDK(dk)
 		go goPlan(data.DataValue.Controller.PK)
+		time.Sleep(time.Second)
 	} else {
 		hour := time.Now().Hour()
 		min := time.Now().Minute()
@@ -326,5 +329,6 @@ func choicePlan() {
 		dk.RDK = 8
 		data.DataValue.SetDK(dk)
 		go goPlan(data.DataValue.Controller.PK)
+		time.Sleep(time.Second)
 	}
 }
