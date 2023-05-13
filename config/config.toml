@@ -1,8 +1,8 @@
 logpath="log/"
-# id=198460			#Номер устройства
+id=198460			#Номер устройства
 # id=230412
-id=108682
-immitator=true     #если истина то запускать имитатор 
+# id=108682
+immitator=false     #если истина то запускать имитатор 
 [modbus]
 	# device="rtu:///dev/ttyUSB0"
 	device="rtu:///dev/ttyEXTRA2_00"
@@ -10,9 +10,9 @@ immitator=true     #если истина то запускать имитато
 	paruty="N"
 	uid=247
 [server]
-	host="asdu.tech"
+	# host="asdu.tech"
 	# host="10.151.50.126"
-	# host="127.0.0.1"
+	host="192.168.2.156"
 	port=1093
 [watchdog]
 	step=60 		#цикл watchdog в секундах

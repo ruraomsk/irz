@@ -3,6 +3,7 @@ package worker
 import (
 	"time"
 
+	"github.com/ruraomsk/ag-server/binding"
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/irz/data"
@@ -42,12 +43,9 @@ func Worker() {
 	if data.DataValue.Controller.Base {
 		data.ToDevice <- 0
 		data.ToServer <- 0
-	} else {
-		//Выбираем согласно планов
-		// но пока все равно в ЛР
-		choicePlan()
 	}
 	tik := time.NewTicker(1 * time.Second)
+	go controllerPlans()
 	logger.Info.Print("Начинаем основной цикл worker")
 	for {
 		select {
@@ -178,9 +176,41 @@ func choicePlan() {
 		if workplan && nowPlan == data.DataValue.CommandDU.PK {
 			return
 		}
-		stopPlan()
-
-		go goPlan(data.DataValue.CommandDU.PK)
+		logger.Debug.Printf("Назначен план %d", data.DataValue.CommandDU.PK)
+		var p = binding.SetPk{Pk: 0}
+		for _, v := range data.DataValue.Arrays.SetDK.DK {
+			if v.Pk == data.DataValue.CommandDU.PK {
+				p = v
+			}
+		}
+		if p.TypePU == 1 {
+			stopPlan()
+			data.DataValue.Controller.PK = data.DataValue.CommandDU.PK
+			dk.RDK = 8
+			data.DataValue.SetDK(dk)
+			go goPlan(data.DataValue.Controller.PK)
+		} else {
+			hour := time.Now().Hour()
+			min := time.Now().Minute()
+			sec := time.Now().Second()
+			w := (hour*3600 + min*60 + sec) % p.Tc
+			if w != 0 {
+				w = p.Tc - w
+			}
+			w += p.Shift
+			if w > 0 {
+				for w != 1 {
+					logger.Debug.Printf("До старта плана %d %d %d %d:%d:%d", p.Pk, p.Tc, w, hour, min, sec)
+					time.Sleep(time.Second)
+					w--
+				}
+			}
+			stopPlan()
+			dk.RDK = 8
+			data.DataValue.Controller.PK = data.DataValue.CommandDU.PK
+			data.DataValue.SetDK(dk)
+			go goPlan(data.DataValue.Controller.PK)
+		}
 
 		return
 	}
@@ -241,13 +271,13 @@ func choicePlan() {
 			break
 		}
 	}
-	// logger.Debug.Printf("find PK %d", pk)
+	// logger.Debug.Printf("Выбран PK %d", pk)
 
-	data.DataValue.Controller.PK = pk
-	if data.DataValue.Controller.PK == 0 {
+	if pk == 0 {
 		//Все плохо свалимся в ЛР
 		logger.Error.Println("плохо свалимся в ЛР")
 		stopPlan()
+		data.DataValue.Controller.PK = pk
 		dk.FDK = 1
 		dk.RDK = 6
 		dk.EDK = 4
@@ -257,13 +287,44 @@ func choicePlan() {
 		data.ToServer <- 0
 		return
 	}
-	if workplan && nowPlan == data.DataValue.Controller.PK {
+	if workplan && nowPlan == pk {
+		// logger.Debug.Printf("Выбран PK %d и он исполняется", pk)
+
 		return
 	}
-	stopPlan()
-	dk.RDK = 8
-	data.DataValue.SetDK(dk)
-	// data.ToServer <- 0
 
-	go goPlan(data.DataValue.Controller.PK)
+	var p = binding.SetPk{Pk: 0}
+	for _, v := range data.DataValue.Arrays.SetDK.DK {
+		if v.Pk == pk {
+			p = v
+		}
+	}
+	if p.TypePU == 1 {
+		stopPlan()
+		data.DataValue.Controller.PK = pk
+		dk.RDK = 8
+		data.DataValue.SetDK(dk)
+		go goPlan(data.DataValue.Controller.PK)
+	} else {
+		hour := time.Now().Hour()
+		min := time.Now().Minute()
+		sec := time.Now().Second()
+		w := (hour*3600 + min*60 + sec) % p.Tc
+		if w != 0 {
+			w = p.Tc - w
+		}
+		w += p.Shift
+		if w > 0 {
+			for w != 1 {
+				logger.Debug.Printf("До старта плана %d %d %d %d:%d:%d", p.Pk, p.Tc, w, hour, min, sec)
+				time.Sleep(time.Second)
+				w--
+			}
+		}
+		stopPlan()
+		data.DataValue.Controller.PK = pk
+		dk.RDK = 8
+		data.DataValue.SetDK(dk)
+		go goPlan(data.DataValue.Controller.PK)
+	}
 }
