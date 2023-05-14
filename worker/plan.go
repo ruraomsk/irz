@@ -54,7 +54,8 @@ func waitTime(seconds int, phase int) error {
 		case <-endphase.C:
 			return nil
 		case state = <-toPlan:
-			logger.Info.Printf("to plan %v", state)
+			continue
+			// logger.Info.Printf("to plan %v", state)
 		}
 	}
 }
@@ -77,7 +78,7 @@ func goPlan(pl int) {
 	data.DataValue.SetDK(dk)
 	workplan = true
 	defer exitPlan()
-	logger.Info.Printf("Выполняем план %d", pk.Pk)
+	// logger.Info.Printf("Выполняем план %d", pk.Pk)
 	data.DataValue.Controller.PK = pl
 	if pk.Tc == 0 {
 		//ЛР
@@ -149,7 +150,7 @@ func goPlan(pl int) {
 				tvp1 := <-data.AInfo
 				data.QAInfo <- data.QInfo{TypeDev: 2, Interval: lastTimePhase}
 				tvp2 := <-data.AInfo
-				logger.Debug.Printf("tvp1 %v tvp2 %v", tvp1, tvp2)
+				// logger.Debug.Printf("tvp1 %v tvp2 %v", tvp1, tvp2)
 				if v.Tf == 2 {
 					if tvp1 {
 						if waitTime(v.Stop-v.Start, v.Number) != nil {
@@ -249,6 +250,10 @@ func goPlan(pl int) {
 				dk.PDK = false
 				data.DataValue.SetDK(dk)
 			}
+		} else {
+			if flagP < 0 {
+				flagP = -1
+			}
 		}
 	}
 }
@@ -258,11 +263,11 @@ func buildControl(pk binding.SetPk) control {
 func repackPlan(pk binding.SetPk) binding.SetPk {
 	logger.Info.Printf("in %s", toSting(pk))
 	if pk.TypePU == 1 {
-		logger.Info.Printf("План локальный ничего не меняем")
+		// logger.Info.Printf("План локальный ничего не меняем")
 		return pk
 	}
 	if pk.Shift == 0 {
-		logger.Info.Printf("План координированный смещение 0")
+		// logger.Info.Printf("План координированный смещение 0")
 		return pk
 	}
 	newPk := pk
@@ -322,6 +327,7 @@ func repackPlan(pk binding.SetPk) binding.SetPk {
 	logger.Info.Printf("out %s", toSting(newPk))
 	return newPk
 }
+
 func toSting(pk binding.SetPk) string {
 	res := fmt.Sprintf("shift=%d {", pk.Shift)
 	for _, v := range pk.Stages {

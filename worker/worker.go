@@ -50,7 +50,7 @@ func Worker() {
 	for {
 		select {
 		case cmd := <-data.Commands:
-			logger.Info.Printf("Команда %v", cmd)
+			// logger.Info.Printf("Команда %v", cmd)
 			dk.DDK = cmd.Source
 			switch cmd.Command {
 			case 5:
@@ -139,7 +139,7 @@ func Worker() {
 			}
 			choicePlan()
 		case dev := <-data.FromDevice:
-			logger.Info.Printf("От устройства %s", dev.ToString())
+			// logger.Info.Printf("От устройства %s", dev.ToString())
 			// data.DataValue.Connect = dev.Connect
 			dk = data.DataValue.GetDK()
 			if workplan {
@@ -163,7 +163,7 @@ func Worker() {
 				dk.TDK = 0
 			}
 			data.DataValue.SetDK(dk)
-			logger.Info.Printf("%v", data.DataValue.Controller.DK)
+			// logger.Info.Printf("%v", data.DataValue.Controller.DK)
 			data.ToServer <- 0
 		}
 	}
@@ -201,7 +201,7 @@ func choicePlan() {
 			w += p.Shift
 			if w > 0 {
 				for w != 1 {
-					logger.Debug.Printf("До старта плана %d %d %d %d:%d:%d", p.Pk, p.Tc, w, hour, min, sec)
+					// logger.Debug.Printf("До старта плана %d %d %d %d:%d:%d", p.Pk, p.Tc, w, hour, min, sec)
 					time.Sleep(time.Second)
 					w--
 				}
@@ -301,6 +301,7 @@ func choicePlan() {
 			p = v
 		}
 	}
+	logger.Debug.Printf("Переходим на план %d", pk)
 	if p.TypePU == 1 {
 		stopPlan()
 		data.DataValue.Controller.PK = pk
@@ -316,10 +317,11 @@ func choicePlan() {
 		if w != 0 {
 			w = p.Tc - w
 		}
+		data.DataValue.Controller.DK.PDK = true
 		w += p.Shift
 		if w > 0 {
 			for w != 1 {
-				logger.Debug.Printf("До старта плана %d %d %d %d:%d:%d", p.Pk, p.Tc, w, hour, min, sec)
+				// logger.Debug.Printf("До старта плана %d %d %d %d:%d:%d", p.Pk, p.Tc, w, hour, min, sec)
 				time.Sleep(time.Second)
 				w--
 			}

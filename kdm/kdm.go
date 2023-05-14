@@ -69,6 +69,7 @@ func Kdm() {
 		data.DataValue.Connect = true
 		state.Connect = true
 		workModbus()
+		logger.Error.Printf("Завершили обмен с ModBus")
 		data.DataValue.Connect = false
 		state.Connect = false
 		data.FromDevice <- state
@@ -145,10 +146,10 @@ func workModbus() {
 			}
 
 		case in := <-data.ToDevice:
+			logger.Debug.Printf("set phase %v", in)
 			if in == lastcmd {
 				continue
 			}
-			logger.Debug.Printf("from worker %v", in)
 			lastcmd = in
 			switch in {
 			case 0:

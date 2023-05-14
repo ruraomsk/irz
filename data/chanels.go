@@ -56,8 +56,8 @@ var Statistics chan pudge.Statistic
 func initChans() {
 	Commands = make(chan InternalCmd, 100)
 	Arrays = make(chan binding.Arrays, 100)
-	ToServer = make(chan int, 1)
-	ToDevice = make(chan int, 10)
+	ToServer = make(chan int)
+	ToDevice = make(chan int)
 	FromDevice = make(chan StatusDevice, 10)
 	Statistics = make(chan pudge.Statistic, 10)
 	QAInfo = make(chan QInfo)
