@@ -83,7 +83,7 @@ func goPlan(pl int) {
 	if pk.Tc == 0 {
 		//ЛР
 		for {
-			if waitTime(9999999, 0) != nil {
+			if waitTime(99999, 0) != nil {
 				return
 			}
 		}
@@ -91,7 +91,7 @@ func goPlan(pl int) {
 	if pk.Tc == 1 {
 		//ЖМ
 		for {
-			if waitTime(9999999, 10) != nil {
+			if waitTime(99999, 10) != nil {
 				return
 			}
 		}
@@ -99,7 +99,7 @@ func goPlan(pl int) {
 	}
 	if pk.Tc == 2 {
 		for {
-			if waitTime(9999999, 11) != nil {
+			if waitTime(99999, 11) != nil {
 				return
 			}
 		}
@@ -136,6 +136,10 @@ func goPlan(pl int) {
 					dk = data.DataValue.GetDK()
 					dk.EDK = 8
 					data.DataValue.SetDK(dk)
+				} else {
+					dk = data.DataValue.GetDK()
+					dk.EDK = 0
+					data.DataValue.SetDK(dk)
 				}
 			}
 			if isTVP(v.Tf) {
@@ -161,6 +165,10 @@ func goPlan(pl int) {
 							dk = data.DataValue.GetDK()
 							dk.EDK = 8
 							data.DataValue.SetDK(dk)
+						} else {
+							dk = data.DataValue.GetDK()
+							dk.EDK = 0
+							data.DataValue.SetDK(dk)
 						}
 						if zam {
 							skip = true
@@ -174,6 +182,10 @@ func goPlan(pl int) {
 								logger.Error.Printf("Неподчинение фазы %d приходит %d", dv.Number, state.PhaseTU)
 								dk = data.DataValue.GetDK()
 								dk.EDK = 8
+								data.DataValue.SetDK(dk)
+							} else {
+								dk = data.DataValue.GetDK()
+								dk.EDK = 0
 								data.DataValue.SetDK(dk)
 							}
 							skip = true
@@ -190,6 +202,10 @@ func goPlan(pl int) {
 							dk = data.DataValue.GetDK()
 							dk.EDK = 8
 							data.DataValue.SetDK(dk)
+						} else {
+							dk = data.DataValue.GetDK()
+							dk.EDK = 0
+							data.DataValue.SetDK(dk)
 						}
 						if zam {
 							skip = true
@@ -203,6 +219,10 @@ func goPlan(pl int) {
 								logger.Error.Printf("Неподчинение фазы %d приходит %d", dv.Number, state.PhaseTU)
 								dk = data.DataValue.GetDK()
 								dk.EDK = 8
+								data.DataValue.SetDK(dk)
+							} else {
+								dk = data.DataValue.GetDK()
+								dk.EDK = 0
 								data.DataValue.SetDK(dk)
 							}
 							skip = true
@@ -219,6 +239,10 @@ func goPlan(pl int) {
 							dk = data.DataValue.GetDK()
 							dk.EDK = 8
 							data.DataValue.SetDK(dk)
+						} else {
+							dk = data.DataValue.GetDK()
+							dk.EDK = 0
+							data.DataValue.SetDK(dk)
 						}
 						if zam {
 							skip = true
@@ -232,6 +256,10 @@ func goPlan(pl int) {
 								logger.Error.Printf("Неподчинение фазы %d приходит %d", dv.Number, state.PhaseTU)
 								dk = data.DataValue.GetDK()
 								dk.EDK = 8
+								data.DataValue.SetDK(dk)
+							} else {
+								dk = data.DataValue.GetDK()
+								dk.EDK = 0
 								data.DataValue.SetDK(dk)
 							}
 							skip = true

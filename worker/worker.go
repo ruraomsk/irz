@@ -183,7 +183,7 @@ func choicePlan() {
 				p = v
 			}
 		}
-		if p.TypePU == 1 {
+		if p.TypePU == 1 || p.Tc < 3 {
 			stopPlan()
 			data.DataValue.Controller.PK = data.DataValue.CommandDU.PK
 			dk.RDK = 8
@@ -302,7 +302,7 @@ func choicePlan() {
 		}
 	}
 	logger.Debug.Printf("Переходим на план %d", pk)
-	if p.TypePU == 1 {
+	if p.TypePU == 1 || p.Tc < 3 {
 		stopPlan()
 		data.DataValue.Controller.PK = pk
 		dk.RDK = 8
