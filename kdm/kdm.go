@@ -243,7 +243,7 @@ func setLocal() error {
 		return err
 	}
 	// ставим команду ЛР
-	err = client.WriteRegister(4, 1)
+	err = client.WriteRegister(0x0c, 0)
 	if err != nil {
 		return fmt.Errorf("modbus write %v", err.Error())
 	}
