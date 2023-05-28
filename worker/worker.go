@@ -17,6 +17,14 @@ type NowState struct {
 	DU     int
 	Phase  int
 }
+type nowLocal struct {
+	mes  int
+	day  int
+	nday int
+	hour int
+	min  int
+	sec  int
+}
 
 var dk = pudge.DK{RDK: 5, FDK: 0, DDK: 4, EDK: 0, PDK: false, EEDK: 0, ODK: false, LDK: 0, FTUDK: 0, TDK: 0, FTSDK: 0, TTCDK: 0}
 var endDUPhase time.Timer
@@ -191,10 +199,8 @@ func choicePlan() {
 			go goPlan(data.DataValue.Controller.PK)
 			time.Sleep(time.Second)
 		} else {
-			hour := time.Now().Hour()
-			min := time.Now().Minute()
-			sec := time.Now().Second()
-			w := (hour*3600 + min*60 + sec) % p.Tc
+			r := getLocalTime()
+			w := (r.hour*3600 + r.min*60 + r.sec) % p.Tc
 			if w != 0 {
 				w = p.Tc - w
 			}
@@ -227,19 +233,12 @@ func choicePlan() {
 	} else {
 		data.DataValue.Controller.NK = 0
 	}
-	mes := time.Now().Month()
-	day := time.Now().Day()
-	nday := time.Now().Weekday()
-	if nday == 0 {
-		nday = 7
-	}
-	hour := time.Now().Hour()
-	min := time.Now().Minute()
+	r := getLocalTime()
 	if data.DataValue.Controller.NK == 0 {
 		mk := 0
 		for _, v := range data.DataValue.Arrays.MonthSets.MonthSets {
-			if v.Number == int(mes) {
-				mk = v.Days[day-1]
+			if v.Number == int(r.mes) {
+				mk = v.Days[r.day-1]
 				break
 			}
 		}
@@ -250,7 +249,7 @@ func choicePlan() {
 		ck := 0
 		for _, v := range data.DataValue.Arrays.WeekSets.WeekSets {
 			if v.Number == int(data.DataValue.Controller.NK) {
-				ck = v.Days[nday-1]
+				ck = v.Days[r.nday-1]
 			}
 		}
 		// logger.Debug.Printf("find CK %d", ck)
@@ -260,11 +259,11 @@ func choicePlan() {
 	for _, v := range data.DataValue.Arrays.DaySets.DaySets {
 		if v.Number == int(data.DataValue.Controller.CK) {
 			for _, v := range v.Lines {
-				if hour < v.Hour {
+				if r.hour < v.Hour {
 					pk = v.PKNom
 					break
 				} else {
-					if hour == v.Hour && min <= v.Min {
+					if r.hour == v.Hour && r.min <= v.Min {
 						pk = v.PKNom
 						break
 					}
@@ -310,10 +309,8 @@ func choicePlan() {
 		go goPlan(data.DataValue.Controller.PK)
 		time.Sleep(time.Second)
 	} else {
-		hour := time.Now().Hour()
-		min := time.Now().Minute()
-		sec := time.Now().Second()
-		w := (hour*3600 + min*60 + sec) % p.Tc
+		r := getLocalTime()
+		w := (r.hour*3600 + r.min*60 + r.sec) % p.Tc
 		if w != 0 {
 			w = p.Tc - w
 		}
@@ -333,4 +330,19 @@ func choicePlan() {
 		go goPlan(data.DataValue.Controller.PK)
 		time.Sleep(time.Second)
 	}
+}
+func getLocalTime() nowLocal {
+	var r nowLocal
+	t := time.Now().Add(time.Duration(data.DataValue.Arrays.TimeDivice.TimeZone) * time.Hour)
+	r.hour = t.Hour()
+	r.min = t.Minute()
+	r.sec = t.Second()
+	r.mes = int(t.Month())
+	r.day = t.Day()
+	r.nday = int(t.Weekday())
+	if r.nday == 0 {
+		r.nday = 7
+	}
+	logger.Info.Printf("now %d:%d:%d", r.hour, r.min, r.sec)
+	return r
 }

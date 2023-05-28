@@ -15,19 +15,20 @@ var client *modbus.ModbusClient
 var err error
 
 type KdmStatus struct {
-	Phase     int
-	PhaseTU   int
-	Time      int
-	Status    int
-	NKPogramm int
-	Blink     int
-	PhaseRU   int
-	BadKeys   bool
-	SetKeys   []uint16
-	Lamp      int
-	Connect   bool
-	isBlink   bool
-	isOS      bool
+	Phase      int
+	PhaseTU    int
+	Time       int
+	Status     int
+	NKPogramm  int
+	Blink      int
+	PhaseRU    int
+	BadKeys    bool
+	SetKeys    []uint16
+	Lamp       int
+	Connect    bool
+	isBlink    bool
+	isOS       bool
+	isSetPhase bool
 }
 
 var state = data.StatusDevice{Door: false, Lamp: 0, Phase: 0, PhaseTC: 0, PhaseTU: 0, Connect: false}
@@ -92,6 +93,11 @@ func workModbus() {
 	for {
 		select {
 		case <-tick.C:
+			err = getStatus()
+			if err != nil {
+				logger.Error.Print(err.Error())
+				return
+			}
 			if state.PhaseTC == 10 || state.PhaseTC == 11 {
 				continue
 			}
@@ -205,10 +211,13 @@ func workModbus() {
 }
 func stopRUandBlink() error {
 	// // снимаем команду выключения
-	// err = client.WriteRegister(0x0a, 0)
-	// if err != nil {
-	// 	return fmt.Errorf("modbus write %v", err.Error())
-	// }
+	if statusKdm.isBlink {
+		// снимаем команду перейти в ЖМ
+		err = client.WriteRegister(0x0d, 0)
+		if err != nil {
+			return fmt.Errorf("modbus write %v", err.Error())
+		}
+	}
 	// // снимаем команду перейти в РУ
 	// err = client.WriteRegister(0x0c, 0)
 	// if err != nil {
@@ -227,9 +236,22 @@ func stopRUandBlink() error {
 	return nil
 }
 func setBlink() error {
-	err = stopRUandBlink()
+	if statusKdm.isOS {
+		// снимаем команду отключения
+		err = client.WriteRegister(0x0a, 0)
+		if err != nil {
+			return fmt.Errorf("modbus write %v", err.Error())
+		}
+	}
+	if statusKdm.isSetPhase {
+		err = client.WriteRegister(0x0c, 0)
+		if err != nil {
+			return fmt.Errorf("modbus write %v", err.Error())
+		}
+	}
+	err = client.WriteRegister(0x0c21, 0xff)
 	if err != nil {
-		return err
+		return fmt.Errorf("modbus write %v", err.Error())
 	}
 	err = client.WriteRegister(0x0d, 1)
 	if err != nil {
@@ -238,12 +260,29 @@ func setBlink() error {
 	return nil
 }
 func setLocal() error {
-	err = stopRUandBlink()
-	if err != nil {
-		return err
+	if statusKdm.isOS {
+		// снимаем команду отключения
+		err = client.WriteRegister(0x0a, 0)
+		if err != nil {
+			return fmt.Errorf("modbus write %v", err.Error())
+		}
 	}
-	// ставим команду ЛР
-	err = client.WriteRegister(0x0c, 0)
+
+	if statusKdm.isBlink {
+		// снимаем команду перейти в ЖМ
+		err = client.WriteRegister(0x0d, 0)
+		if err != nil {
+			return fmt.Errorf("modbus write %v", err.Error())
+		}
+		return nil
+	}
+	if statusKdm.isSetPhase {
+		err = client.WriteRegister(0x0c, 0)
+		if err != nil {
+			return fmt.Errorf("modbus write %v", err.Error())
+		}
+	}
+	err = client.WriteRegister(0x08, 0)
 	if err != nil {
 		return fmt.Errorf("modbus write %v", err.Error())
 	}
@@ -311,11 +350,14 @@ func getStatus() error {
 	statusKdm.PhaseTU = int(reg16s[3] >> 8)
 	// 0 dhtvz это Промтакт
 	statusKdm.Time = int(reg16s[3] & 0xff)
-	// logger.Debug.Printf("phase %d time %d", statusKdm.PhaseTU, statusKdm.Time)
+	logger.Debug.Printf("phase %d time %d", statusKdm.PhaseTU, statusKdm.Time)
 	if statusKdm.Time == 0 {
 		statusKdm.Phase = 9
 	} else {
 		statusKdm.Phase = statusKdm.PhaseTU
+		if statusKdm.PhaseTU == 0 {
+			statusKdm.Phase = 12
+		}
 	}
 	tvp1 := int(reg16s[2] & 1)
 	tvp2 := int(reg16s[2] & 2)
@@ -340,9 +382,11 @@ func getStatus() error {
 		statusKdm.Phase = 11
 	}
 	statusKdm.PhaseRU = int(reg16s[0x0b])
-
 	statusKdm.Blink = int(reg16s[0x0d])
-
+	statusKdm.isSetPhase = false
+	if reg16s[0x0c] == 1 {
+		statusKdm.isSetPhase = true
+	}
 	flag := reg16s[5]
 	statusKdm.BadKeys = true
 	for i := 0; i < 16; i++ {
