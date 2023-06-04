@@ -67,8 +67,6 @@ func Kdm() {
 			logger.Error.Printf("modbus open %v", err.Error())
 			continue
 		}
-		data.DataValue.Connect = true
-		state.Connect = true
 		workModbus()
 		logger.Error.Printf("Завершили обмен с ModBus")
 		data.DataValue.Connect = false
@@ -85,6 +83,10 @@ func workModbus() {
 		logger.Error.Print(err.Error())
 		return
 	}
+
+	data.DataValue.Connect = true
+	state.Connect = true
+	data.FromDevice <- state
 
 	state.PhaseTC = 0
 	state.PhaseTU = 0
@@ -152,11 +154,11 @@ func workModbus() {
 			}
 
 		case in := <-data.ToDevice:
-			logger.Debug.Printf("set phase %v", in)
-			if in == lastcmd {
+			// logger.Debug.Printf("set phase %v", in&0xff)
+			if in&0xff == lastcmd {
 				continue
 			}
-			lastcmd = in
+			lastcmd = in & 0xff
 			switch in {
 			case 0:
 				newSending()
@@ -194,10 +196,15 @@ func workModbus() {
 				state.NewPhase()
 				data.FromDevice <- state
 			default:
+				lenght := in >> 8
+				if lenght == 0 {
+					lenght = 0xff
+				}
+				in = in & 0xff
 				if in > 0 && in < 9 {
 					// newSending()
 					state.PhaseTC = in
-					err = setPhase(in)
+					err = setPhase(in, lenght)
 					if err != nil {
 						logger.Error.Print(err.Error())
 						return
@@ -288,14 +295,14 @@ func setLocal() error {
 	}
 	return nil
 }
-func setPhase(phase int) error {
+func setPhase(phase int, lenght int) error {
 	// включаем команду перейти в РУ
 	err = client.WriteRegister(0x0c, 1)
 	if err != nil {
 		return fmt.Errorf("modbus write %v", err.Error())
 	}
 	// ставим время фазы в РУ
-	err = client.WriteRegister(0x0c21, 0xff)
+	err = client.WriteRegister(0x0c21, uint16(lenght))
 	if err != nil {
 		return fmt.Errorf("modbus write %v", err.Error())
 	}
@@ -350,7 +357,7 @@ func getStatus() error {
 	statusKdm.PhaseTU = int(reg16s[3] >> 8)
 	// 0 dhtvz это Промтакт
 	statusKdm.Time = int(reg16s[3] & 0xff)
-	logger.Debug.Printf("phase %d time %d", statusKdm.PhaseTU, statusKdm.Time)
+	// logger.Debug.Printf("phase %d time %d", statusKdm.PhaseTU, statusKdm.Time)
 	if statusKdm.Time == 0 {
 		statusKdm.Phase = 9
 	} else {

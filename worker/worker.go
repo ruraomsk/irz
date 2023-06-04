@@ -38,12 +38,6 @@ var isDUPhase = false
 func Worker() {
 	toPlan = make(chan data.StatusDevice, 100)
 	endPlan = make(chan interface{})
-	for !data.DataValue.Connect {
-		dk.EDK = 11
-		dk.DDK = 8
-		data.DataValue.SetDK(dk)
-		time.Sleep(1 * time.Second)
-	}
 	dk.EDK = 0
 	dk.FDK = 1
 	dk.DDK = data.USDK
@@ -58,6 +52,14 @@ func Worker() {
 	for {
 		select {
 		case cmd := <-data.Commands:
+			if !data.DataValue.Connect {
+				dk = data.DataValue.GetDK()
+				dk.EDK = 11
+				dk.DDK = 8
+				data.DataValue.SetDK(dk)
+				data.ToServer <- 0
+				continue
+			}
 			// logger.Info.Printf("Команда %v", cmd)
 			dk.DDK = cmd.Source
 			switch cmd.Command {
@@ -126,24 +128,38 @@ func Worker() {
 				}
 			}
 		case <-endDUPhase.C:
+			if !data.DataValue.Connect {
+				dk = data.DataValue.GetDK()
+				dk.EDK = 11
+				dk.DDK = 8
+				data.DataValue.SetDK(dk)
+				data.ToServer <- 0
+				continue
+			}
 			//Перестали удерживать ДУ
 			data.Commands <- data.InternalCmd{Source: data.USDK, Command: 9, Parametr: 9}
 		case ars := <-data.Arrays:
 			data.DataValue.SetArrays(ars)
-
+			if !data.DataValue.Connect {
+				dk = data.DataValue.GetDK()
+				dk.EDK = 11
+				dk.DDK = 8
+				data.DataValue.SetDK(dk)
+				data.ToServer <- 0
+				continue
+			}
 			stopPlan()
 			// Тут нужно все заново выбрать
 			choicePlan()
 		case <-tik.C:
 			//Выбираем план
-			for !data.DataValue.Connect {
-				for !data.DataValue.Connect {
-					dk.EDK = 11
-					dk.DDK = 8
-					data.DataValue.SetDK(dk)
-					data.ToDevice <- 0
-					time.Sleep(1 * time.Second)
-				}
+			if !data.DataValue.Connect {
+				dk = data.DataValue.GetDK()
+				dk.EDK = 11
+				dk.DDK = 8
+				data.DataValue.SetDK(dk)
+				data.ToServer <- 0
+				continue
 			}
 			choicePlan()
 		case dev := <-data.FromDevice:
@@ -343,6 +359,6 @@ func getLocalTime() nowLocal {
 	if r.nday == 0 {
 		r.nday = 7
 	}
-	logger.Info.Printf("now %d:%d:%d", r.hour, r.min, r.sec)
+	// logger.Info.Printf("now %d:%d:%d", r.hour, r.min, r.sec)
 	return r
 }

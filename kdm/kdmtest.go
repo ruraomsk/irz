@@ -56,7 +56,7 @@ func KdmTest() {
 		}
 		stopRUandBlink()
 		for phase := 1; phase <= 3; phase++ {
-			setPhase(phase)
+			setPhase(phase, 255)
 			for t := 0; t < 30; t++ {
 				getStatus()
 				logger.Info.Printf("Фаза %d Время %d Ру %d ", statusKdm.Phase, statusKdm.Time, statusKdm.PhaseRU)

@@ -32,7 +32,7 @@ func waitTime(seconds int, phase int) error {
 	endphase := time.NewTimer(time.Duration(seconds) * time.Second)
 	repeat := time.NewTicker(time.Minute)
 	count := 0
-	data.ToDevice <- phase
+	data.ToDevice <- seconds<<8 | phase
 	data.ToServer <- 0
 
 	logger.Info.Printf("Исполняем фаза %d плана %d длительность %d", phase, nowPlan, seconds)
