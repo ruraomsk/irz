@@ -1,0 +1,11 @@
+[modbus]
+	# device="rtu:///dev/ttyUSB0"
+	device="rtu:///dev/ttyEXTRA2_00"
+	baudrate=19200
+	paruty="N"
+	uid=247
+[server]
+	host="asdu.tech"
+	# host="10.151.50.126"
+	# host="192.168.2.156"
+	port=1093
