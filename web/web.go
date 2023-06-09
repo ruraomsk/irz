@@ -1,6 +1,8 @@
 package web
 
 import (
+	"fmt"
+
 	"github.com/anoshenko/rui"
 )
 
@@ -66,8 +68,12 @@ func (d *NowSession) OnReconnect(session rui.Session) {
 func CreateSession(_ rui.Session) rui.SessionContent {
 	sessionContent := new(NowSession)
 	sessionContent.pages = []Page{
-		{"Текущее состояние", createTextStyleDemo, nil},
-		{"Настройка", viewDemo, nil},
+		{"Текущее состояние", statusShow, nil},
+		{"Планы координации", PKShow, nil},
+		{"Суточные карты", CKShow, nil},
+		{"Недельные карты", NKShow, nil},
+		{"Годовая карта", YearShow, nil},
+		{"Состояние КДМ", KDMShow, nil},
 	}
 
 	return sessionContent
@@ -122,6 +128,19 @@ func (d *NowSession) showPage(index int) {
 			stackLayout.MoveToFront(d.pages[index].view)
 		}
 		rui.Set(d.rootView, "rootTitleText", rui.Text, d.pages[index].title)
-		d.rootView.Session().SetTitle(d.pages[index].title)
+		// d.rootView.Session().SetTitle(d.pages[index].title)
 	}
+}
+func Web() {
+	rui.ProtocolInDebugLog = false
+	addr := rui.GetLocalIP() + ":8000"
+	// addr := "localhost:8000"
+	fmt.Println(addr)
+	rui.OpenBrowser("http://" + addr)
+	rui.StartApp(addr, CreateSession, rui.AppParams{
+		Title:      "Ag-IRZ",
+		Icon:       "icon.png",
+		TitleColor: rui.Color(0xffc0ded9),
+	})
+
 }

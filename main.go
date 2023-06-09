@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"runtime"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/anoshenko/rui"
@@ -58,14 +60,16 @@ func main() {
 		go kdm.Kdm()
 	}
 	go stat.Statistics()
+	rui.AddEmbedResources(&resources)
+	go web.Web()
 
-	// c := make(chan os.Signal, 1)
-	// signal.Notify(c, os.Interrupt)
-	// <-c
-	// time.Sleep(5 * time.Second)
-	// fmt.Println("iRZ stop")
-	// logger.Info.Println("iRZ stop")
-	rui.ProtocolInDebugLog = true
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	<-c
+	fmt.Println("\nwait ...")
+	time.Sleep(5 * time.Second)
+	fmt.Println("iRZ stop")
+	logger.Info.Println("iRZ stop")
 	/*
 		rui.SetDebugLog(func(text string) {
 			if len(text) > 120 {
@@ -74,15 +78,5 @@ func main() {
 			log.Println(text)
 		})
 	*/
-	rui.AddEmbedResources(&resources)
 
-	//addr := rui.GetLocalIP() + ":8080"
-	addr := "localhost:8000"
-	fmt.Print(addr)
-	rui.OpenBrowser("http://" + addr)
-	rui.StartApp(addr, web.CreateSession, rui.AppParams{
-		Title:      "Ag-IRZ",
-		Icon:       "icon.svg",
-		TitleColor: rui.Color(0xffc0ded9),
-	})
 }
