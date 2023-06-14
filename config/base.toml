@@ -7,7 +7,7 @@ immitator=false     #если истина то запускать имитат�
 	# device="rtu:///dev/ttyUSB0"
 	device="rtu:///dev/ttyEXTRA2_00"
 	baudrate=19200
-	paruty="N"
+	parity="N"
 	uid=247
 [server]
 	host="asdu.tech"
