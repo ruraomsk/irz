@@ -10,10 +10,10 @@ GridLayout {
 			width = 100%, height = 100%, cell-vertical-align = center, cell-horizontal-align = center,
 			content = [
 				TextView {
-					id = textStyleText, padding = 16px, max-width = 80%, 
+					text-color="red",text-align="center",text-size="24px",
 					border = _{ style = solid, width = 1px, color = darkgray },
-					text = "Здесь должен быть Недельные карты "
-				}
+					text = "НЕДЕЛЬНЫЕ КАРТЫ"
+				},
 			]
 		},
 			]

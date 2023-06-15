@@ -17,21 +17,22 @@ ListLayout {
 			width = 100%, height = 100%, orientation = vertical, padding = 16px,
 			content = [
 				TextView {
+					text-color="red",text-align="center",text-size="24px",
+					border = _{ style = solid, width = 1px, color = darkgray },
 					text = "Текущее состояние УСДК"
 				},
 				TextView {
-					id=idDevice,
+					id=idDevice,semantics="code",
 					text = "Номер контроллера"
 				},
 				TextView {
-					id=idConnect,
+					id=idConnect,semantics="code",
 					text = "server"
 				},
 				TextView {
-					id=idModbus,
+					id=idModbus,semantics="code",
 					text = "modbus"
 				},
-
 			]
 		},
 	]
