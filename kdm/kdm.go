@@ -30,19 +30,47 @@ type KdmStatus struct {
 	isOS       bool
 	isSetPhase bool
 }
+type WriteCmd struct {
+	Request Request
+	Data    []uint16
+}
+type Request struct {
+	Start  uint16
+	Lenght uint16
+}
+type Replay struct {
+	Request Request
+	Status  error
+	Data    []uint16
+}
+type Info struct {
+	Phase  int
+	Lenght int
+}
 
-var state = data.StatusDevice{Door: false, Lamp: 0, Phase: 0, PhaseTC: 0, PhaseTU: 0, Connect: false}
+var State = data.StatusDevice{Door: false, Lamp: 0, Phase: 0, PhaseTC: 0, PhaseTU: 0, Connect: false}
 var sendpromtakt = false
 var sendphase = false
 var savepromtakt = false
-var savestate = state
+var savestate = State
 
 var statusKdm KdmStatus
 var lastcmd = -1
+var RequestChan chan Request
+var ReplayChan chan Replay
+var WriteCmdChan chan WriteCmd
+var InfoChan chan Info
 
 func Kdm() {
+
+	RequestChan = make(chan Request)
+	ReplayChan = make(chan Replay)
+	WriteCmdChan = make(chan WriteCmd)
+	InfoChan = make(chan Info)
+
 	statusKdm.SetKeys = make([]uint16, 32)
-	for !state.Connect {
+
+	for !State.Connect {
 		data.DataValue.Connect = false
 		time.Sleep(time.Second)
 		// for an RTU (serial) device/bus
@@ -70,8 +98,8 @@ func Kdm() {
 		workModbus()
 		logger.Error.Printf("Завершили обмен с ModBus")
 		data.DataValue.Connect = false
-		state.Connect = false
-		data.FromDevice <- state
+		State.Connect = false
+		data.FromDevice <- State
 	}
 }
 func workModbus() {
@@ -85,32 +113,36 @@ func workModbus() {
 	}
 
 	data.DataValue.Connect = true
-	state.Connect = true
-	data.FromDevice <- state
+	State.Connect = true
+	data.FromDevice <- State
 
-	state.PhaseTC = 0
-	state.PhaseTU = 0
-	state.Phase = 0
+	State.PhaseTC = 0
+	State.PhaseTU = 0
+	State.Phase = 0
 	var tick = time.NewTicker(1 * time.Second)
 	for {
 		select {
+		case req := <-RequestChan:
+			ReplayChan <- readData(req)
+		case wr := <-WriteCmdChan:
+			ReplayChan <- writeData(wr)
 		case <-tick.C:
 			err = getStatus()
 			if err != nil {
 				logger.Error.Print(err.Error())
 				return
 			}
-			if state.PhaseTC == 10 || state.PhaseTC == 11 {
+			if State.PhaseTC == 10 || State.PhaseTC == 11 {
 				continue
 			}
 
-			state.TimeTU++
-			state.TimeTC++
-			if state.TimeTC > 255 {
-				state.TimeTC = 0
+			State.TimeTU++
+			State.TimeTC++
+			if State.TimeTC > 255 {
+				State.TimeTC = 0
 			}
-			if state.TimeTU > 255 {
-				state.TimeTU = 0
+			if State.TimeTU > 255 {
+				State.TimeTU = 0
 			}
 			err = getStatus()
 			if err != nil {
@@ -119,11 +151,11 @@ func workModbus() {
 			}
 			if statusKdm.Phase == 9 {
 				if !savepromtakt {
-					state.Phase = 9
-					state.PhaseTU = statusKdm.PhaseTU
-					savestate = state
+					State.Phase = 9
+					State.PhaseTU = statusKdm.PhaseTU
+					savestate = State
 					// data.FromDevice <- state
-					state.Phase = statusKdm.PhaseTU
+					State.Phase = statusKdm.PhaseTU
 					savepromtakt = true
 					sendphase = false
 					sendpromtakt = false
@@ -132,25 +164,25 @@ func workModbus() {
 			if statusKdm.PhaseTU != savestate.PhaseTU && !sendpromtakt {
 				savestate.PhaseTU = statusKdm.PhaseTU
 				sendpromtakt = true
-				savestate.TimeTC = state.TimeTC - savestate.TimeTC
+				savestate.TimeTC = State.TimeTC - savestate.TimeTC
 				data.FromDevice <- savestate
-				state.TimeTU = state.TimeTU - savestate.TimeTU
-				state.TimeTC = 0
+				State.TimeTU = State.TimeTU - savestate.TimeTU
+				State.TimeTC = 0
 
 			}
 			if statusKdm.Phase != 9 {
 				if !sendphase {
-					state.Phase = statusKdm.Phase
-					state.PhaseTU = statusKdm.PhaseTU
-					data.FromDevice <- state
+					State.Phase = statusKdm.Phase
+					State.PhaseTU = statusKdm.PhaseTU
+					data.FromDevice <- State
 					sendphase = true
 					savepromtakt = false
 				}
 			}
-			if statusKdm.Lamp != state.Lamp || statusKdm.Connect != state.Connect {
-				state.Lamp = statusKdm.Lamp
-				state.Connect = statusKdm.Connect
-				data.FromDevice <- state
+			if statusKdm.Lamp != State.Lamp || statusKdm.Connect != State.Connect {
+				State.Lamp = statusKdm.Lamp
+				State.Connect = statusKdm.Connect
+				data.FromDevice <- State
 			}
 
 		case in := <-data.ToDevice:
@@ -158,6 +190,7 @@ func workModbus() {
 			if in&0xff == lastcmd {
 				continue
 			}
+			InfoChan <- Info{Phase: in & 0xff, Lenght: in >> 8}
 			lastcmd = in & 0xff
 			switch in {
 			case 0:
@@ -167,8 +200,8 @@ func workModbus() {
 					logger.Error.Print(err.Error())
 					return
 				}
-				state.PhaseTC = 0
-				state.PhaseTU = 0
+				State.PhaseTC = 0
+				State.PhaseTU = 0
 			case 10:
 				//ЖМ
 				newSending()
@@ -177,11 +210,11 @@ func workModbus() {
 					logger.Error.Print(err.Error())
 					return
 				}
-				state.Phase = 10
-				state.PhaseTC = 10
-				state.PhaseTU = 10
-				data.FromDevice <- state
-				state.NewPhase()
+				State.Phase = 10
+				State.PhaseTC = 10
+				State.PhaseTU = 10
+				data.FromDevice <- State
+				State.NewPhase()
 			case 11:
 				//OC
 				err = setOS()
@@ -190,11 +223,11 @@ func workModbus() {
 					return
 				}
 				newSending()
-				state.Phase = 11
-				state.PhaseTC = 11
-				state.PhaseTU = 11
-				state.NewPhase()
-				data.FromDevice <- state
+				State.Phase = 11
+				State.PhaseTC = 11
+				State.PhaseTU = 11
+				State.NewPhase()
+				data.FromDevice <- State
 			default:
 				lenght := in >> 8
 				if lenght == 0 {
@@ -203,7 +236,7 @@ func workModbus() {
 				in = in & 0xff
 				if in > 0 && in < 9 {
 					// newSending()
-					state.PhaseTC = in
+					State.PhaseTC = in
 					err = setPhase(in, lenght)
 					if err != nil {
 						logger.Error.Print(err.Error())

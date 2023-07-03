@@ -3,9 +3,16 @@ logpath="log/"
 # id=230412
 id=108682			#Номер в Элисте
 immitator=false     #если истина то запускать имитатор 
+visio=true			#если истино то есть индикаторы обратного отсчета
 [modbus]
 	# device="rtu:///dev/ttyUSB0"
 	device="rtu:///dev/ttyEXTRA2_00"
+	baudrate=19200
+	parity="N"
+	uid=247
+[visiodevice]
+	device="/dev/ttyUSB0"
+	#device="rtu:///dev/ttyEXTRA2_00"
 	baudrate=19200
 	parity="N"
 	uid=247
