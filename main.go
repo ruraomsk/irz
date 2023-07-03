@@ -17,6 +17,7 @@ import (
 	"github.com/ruraomsk/irz/kdm"
 	"github.com/ruraomsk/irz/setup"
 	"github.com/ruraomsk/irz/stat"
+	"github.com/ruraomsk/irz/visio"
 	"github.com/ruraomsk/irz/web"
 	"github.com/ruraomsk/irz/worker"
 )
@@ -59,6 +60,7 @@ func main() {
 	} else {
 		go kdm.Kdm()
 	}
+	go visio.Visio()
 	go stat.Statistics()
 	rui.AddEmbedResources(&resources)
 	go web.Web()

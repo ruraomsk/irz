@@ -15,6 +15,8 @@ func Visio() {
 	}
 	load()
 	for {
-
+		select {
+		case <-kdm.InfoChan:
+		}
 	}
 }
