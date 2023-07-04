@@ -1,5 +1,5 @@
-github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
-github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
+github.com/BurntSushi/toml v1.3.2 h1:o7IhLm0Msx3BaB+n3Ag7L8EVlByGnpq14C4YWiu/gL8=
+github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/anoshenko/rui v0.13.0 h1:wT1NF0khGmlf7FI8Fge+Ng4DSMgb82t7tMulpk5DkeE=
 github.com/anoshenko/rui v0.13.0/go.mod h1:EXlGPrq8D7J738nnb1F1J2uXqczn+brP5VPDusvCmAQ=
 github.com/goburrow/serial v0.1.0 h1:v2T1SQa/dlUqQiYIT8+Cu7YolfqAi3K96UmhwYyuSrA=
@@ -10,7 +10,7 @@ github.com/lib/pq v1.10.5 h1:J+gdV2cUmX7ZqL2B0lFcW0m+egaHC2V3lpO8nWxyYiQ=
 github.com/lib/pq v1.10.5/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
 github.com/robfig/cron/v3 v3.0.1 h1:WdRxkvbJztn8LMz/QEvLN5sBU+xKpSqwwUO1Pjr4qDs=
 github.com/robfig/cron/v3 v3.0.1/go.mod h1:eQICP3HwyT7UooqI/z+Ov+PtYAWygg1TEWWzGIFLtro=
-github.com/ruraomsk/ag-server v0.0.0-20230120071634-ec939e35c883 h1:YOJD4+bo097y/omyQikILx/ANkWpupuUoyCkJnCm+uM=
-github.com/ruraomsk/ag-server v0.0.0-20230120071634-ec939e35c883/go.mod h1:MpuTy+cjEIJ11T6mZ8/WWQS/RdnowVzDoEO9Mwyin0o=
+github.com/ruraomsk/ag-server v0.0.0-20230701092835-e83e4545d397 h1:pwENA+0W9MsynpJR4/nOSiCW4qlKiqnPisFz11d79Jg=
+github.com/ruraomsk/ag-server v0.0.0-20230701092835-e83e4545d397/go.mod h1:MpuTy+cjEIJ11T6mZ8/WWQS/RdnowVzDoEO9Mwyin0o=
 github.com/simonvetter/modbus v1.6.0 h1:RDHJevtc7LDIVoHAbhDun8fy+QwnGe+ZU+sLm9ZZzjc=
 github.com/simonvetter/modbus v1.6.0/go.mod h1:hh90ZaTaPLcK2REj6/fpTbiV0J6S7GWmd8q+GVRObPw=

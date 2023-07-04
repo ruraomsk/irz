@@ -67,7 +67,11 @@ func Visio() {
 				toTo.maker(status)
 			}
 			//Передаем
-			fmt.Printf("Передача\n%v\n%v\n", toTo.buff160, toTo.buff168)
+			if work {
+				senderChan <- toTo
+			} else {
+				fmt.Printf("Передача\n%v\n%v\n", toTo.buff160, toTo.buff168)
+			}
 		}
 	}
 }
