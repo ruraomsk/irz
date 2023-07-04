@@ -1,6 +1,9 @@
 package web
 
-import "github.com/anoshenko/rui"
+import (
+	"github.com/anoshenko/rui"
+	"github.com/ruraomsk/irz/kdm"
+)
 
 const KDMText = `
 GridLayout {
@@ -27,6 +30,6 @@ func KDMShow(session rui.Session) rui.View {
 	if view == nil {
 		return nil
 	}
-
+	kdm.RequestChan <- kdm.Request{Start: 0, Lenght: 1}
 	return view
 }

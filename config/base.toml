@@ -15,7 +15,6 @@ visio=true			#если истино то есть индикаторы обра�
 	#device="rtu:///dev/ttyEXTRA2_00"
 	baudrate=19200
 	parity="N"
-	uid=247
 [server]
 	host="asdu.tech"
 	# host="10.151.50.126"
