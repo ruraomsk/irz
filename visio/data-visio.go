@@ -10,7 +10,16 @@ type vdata struct {
 	prev   [16]bool
 }
 
-func (v *vdata) init(tcycle int, naps [16]bool) {
+func (v *vdata) init() {
+	v.tcycle = 0
+	for i := 0; i < 16; i++ {
+		v.toff[i] = 0
+		v.ton[i] = 0
+		v.yellow[i] = false
+		v.prev[i] = false
+	}
+}
+func (v *vdata) set(tcycle int, naps [16]bool) {
 	v.tcycle = tcycle
 	for i := 0; i < 16; i++ {
 		v.ton[i] = 0

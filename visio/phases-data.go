@@ -1,6 +1,7 @@
 package visio
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/ruraomsk/ag-server/logger"
@@ -10,6 +11,21 @@ import (
 type phase struct {
 	number int
 	open   [16]bool
+}
+
+func (p phase) toString() string {
+	res := fmt.Sprintf("phase %d", p.number)
+	for i := 0; i < len(p.open); i++ {
+		res += fmt.Sprintf("%d:%v", i+1, p.open[i])
+	}
+	return res
+}
+func showPhases() {
+	fmt.Println("Phases{")
+	for _, v := range phases {
+		fmt.Println("\t" + v.toString())
+	}
+	fmt.Println("}")
 }
 
 var phases map[int]phase
@@ -64,5 +80,7 @@ func load() {
 		if ok {
 			break
 		}
+		time.Sleep(time.Second)
 	}
+	showPhases()
 }
