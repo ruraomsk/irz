@@ -58,16 +58,16 @@ func Visio() {
 				status.init()
 				toTo.makerOS(status)
 			default:
-				p, ok := phases[in.Phase]
+				p, ok := Phases[in.Phase]
 				if !ok {
 					logger.Error.Printf("Нет такой фазы %d", in.Phase)
 					continue
 				}
-				status.set(in.Lenght, p.open)
+				status.set(in.Lenght, p.Open)
 				toTo.maker(status)
 			}
 			//Передаем
-			if work {
+			if Work {
 				senderChan <- toTo
 			} else {
 				fmt.Printf("Передача\n%v\n%v\n", toTo.buff160, toTo.buff168)

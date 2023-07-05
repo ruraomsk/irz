@@ -8,33 +8,34 @@ import (
 	"github.com/ruraomsk/irz/kdm"
 )
 
-type phase struct {
-	number int
-	open   [16]bool
+type Phase struct {
+	Number int
+	Open   [16]bool
 }
 
-func (p phase) toString() string {
-	res := fmt.Sprintf("phase %d", p.number)
-	for i := 0; i < len(p.open); i++ {
-		res += fmt.Sprintf("%d:%v", i+1, p.open[i])
+func (p Phase) toString() string {
+	res := fmt.Sprintf("phase %d", p.Number)
+	for i := 0; i < len(p.Open); i++ {
+		res += fmt.Sprintf("%d:%v", i+1, p.Open[i])
 	}
 	return res
 }
 func showPhases() {
 	fmt.Println("Phases{")
-	for _, v := range phases {
+	for _, v := range Phases {
 		fmt.Println("\t" + v.toString())
 	}
 	fmt.Println("}")
 }
 
-var phases map[int]phase
+var Phases map[int]Phase
 
-var ready bool
+var Ready bool = false
 
 func load() {
-	phases = make(map[int]phase)
+	Phases = make(map[int]Phase)
 	for {
+		Ready = false
 		for !kdm.State.Connect {
 			time.Sleep(time.Second)
 		}
@@ -56,26 +57,26 @@ func load() {
 			if agHi == 0 && agLo == 0 {
 				continue
 			}
-			ph := phase{number: i}
+			ph := Phase{Number: i}
 			j := 0
 			for i := 0; i < 8; i++ {
-				ph.open[j] = false
+				ph.Open[j] = false
 				if agLo&1 == 1 {
-					ph.open[j] = true
+					ph.Open[j] = true
 				}
 				agLo = agLo >> 1
 				j++
 			}
 			agHi = agHi >> 8
 			for i := 0; i < 4; i++ {
-				ph.open[j] = false
+				ph.Open[j] = false
 				if agHi&1 == 1 {
-					ph.open[j] = true
+					ph.Open[j] = true
 				}
 				agHi = agHi >> 1
 				j++
 			}
-			phases[ph.number] = ph
+			Phases[ph.Number] = ph
 		}
 		if ok {
 			break
@@ -83,4 +84,5 @@ func load() {
 		time.Sleep(time.Second)
 	}
 	showPhases()
+	Ready = true
 }

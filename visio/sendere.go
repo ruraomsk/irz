@@ -8,7 +8,7 @@ import (
 	"github.com/ruraomsk/irz/setup"
 )
 
-var work bool
+var Work bool = false
 var senderChan chan toSend
 
 func sender() {
@@ -19,14 +19,14 @@ func sender() {
 	}
 	senderChan = make(chan toSend)
 	for {
-		work = false
+		Work = false
 		port, err := serial.Open(&mode)
 		if err != nil {
 			logger.Error.Printf("%s", err.Error())
 			time.Sleep(time.Second)
 			continue
 		}
-		work = true
+		Work = true
 		for {
 			m := <-senderChan
 			_, err := port.Write(m.buff160[:])
@@ -41,7 +41,7 @@ func sender() {
 			}
 
 		}
-		work = false
+		Work = false
 		port.Close()
 	}
 }
