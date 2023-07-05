@@ -1,8 +1,6 @@
 package web
 
 import (
-	"fmt"
-
 	"github.com/anoshenko/rui"
 )
 
@@ -73,7 +71,7 @@ func CreateSession(_ rui.Session) rui.SessionContent {
 		{"Суточные карты", CKShow, nil},
 		{"Недельные карты", NKShow, nil},
 		{"Годовая карта", YearShow, nil},
-		{"Состояние КДМ", KDMShow, nil},
+		// {"Состояние КДМ", KDMShow, nil},
 	}
 
 	return sessionContent
@@ -135,8 +133,9 @@ func Web() {
 	rui.ProtocolInDebugLog = false
 	addr := rui.GetLocalIP() + ":8000"
 	// addr := "localhost:8000"
-	fmt.Println(addr)
-	rui.OpenBrowser("http://" + addr)
+	if rui.GetLocalIP() == "192.168.2.100" {
+		rui.OpenBrowser("http://" + addr)
+	}
 	rui.StartApp(addr, CreateSession, rui.AppParams{
 		Title:      "Ag-IRZ",
 		Icon:       "icon.png",

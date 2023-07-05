@@ -1,25 +1,13 @@
 package web
 
-import "github.com/anoshenko/rui"
+import (
+	"github.com/anoshenko/rui"
+	"github.com/ruraomsk/irz/data"
+)
 
 const YearText = `
-GridLayout {
-	style = showPage,
-	content = [
-		GridLayout {
-			width = 100%, height = 100%, cell-vertical-align = center, cell-horizontal-align = center,
-			content = [
-				TextView {
-					text-color="red",text-align="center",text-size="24px",
-					border = _{ style = solid, width = 1px, color = darkgray },
-					text = "ГОДОВАЯ КАРТА"
-				},
-			]
-		},
-			]
-		}
-	]
-}
+TableView {cell-horizontal-align = right,
+	id="yk"}
 `
 
 func YearShow(session rui.Session) rui.View {
@@ -27,6 +15,29 @@ func YearShow(session rui.Session) rui.View {
 	if view == nil {
 		return nil
 	}
+	var content [][]any
+	count := 1
+	var header []any
+	header = append(header, "Месяц")
+	for i := 1; i < 32; i++ {
+		header = append(header, i)
+	}
+	content = append(content, header)
+
+	for _, v := range data.DataValue.Arrays.MonthSets.MonthSets {
+		var line []any
+		line = append(line, v.Number)
+		for i := 0; i < len(v.Days); i++ {
+			line = append(line, v.Days[i])
+		}
+		content = append(content, line)
+		count++
+	}
+
+	rui.SetParams(view, "yk", rui.Params{
+		rui.Content:    content,
+		rui.HeadHeight: count,
+	})
 
 	return view
 }

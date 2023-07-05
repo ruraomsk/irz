@@ -105,7 +105,7 @@ func goPlan(pl int) {
 		}
 
 	}
-	pk = repackPlan(pk)
+	pk = RepackPlan(pk)
 	ctrl := buildControl(pk)
 	flagP := 3 //Флаг переходной фазы
 	dk.PDK = true
@@ -288,7 +288,7 @@ func goPlan(pl int) {
 func buildControl(pk binding.SetPk) control {
 	return control{plans: make([]ctrlPlan, 0), lenght: pk.Tc}
 }
-func repackPlan(pk binding.SetPk) binding.SetPk {
+func RepackPlan(pk binding.SetPk) binding.SetPk {
 	logger.Info.Printf("in %s", toSting(pk))
 	if pk.TypePU == 1 {
 		// logger.Info.Printf("План локальный ничего не меняем")
