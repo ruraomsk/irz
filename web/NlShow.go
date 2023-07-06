@@ -25,8 +25,9 @@ func NKShow(session rui.Session) rui.View {
 	}
 
 	rui.SetParams(view, "nk", rui.Params{
-		rui.Content:    content,
-		rui.HeadHeight: count,
+		rui.Content:     content,
+		rui.HeadHeight:  count,
+		rui.CellPadding: "4px",
 	})
 
 	return view

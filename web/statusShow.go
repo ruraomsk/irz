@@ -158,7 +158,12 @@ func updaterStatus(view rui.View, session rui.Session) {
 		if view == nil {
 			return
 		}
-		if !SessionStatus[session.ID()] {
+		w, ok := SessionStatus[session.ID()]
+		if !ok {
+			continue
+		}
+
+		if !w {
 			continue
 		}
 		makeViewStatus(view)

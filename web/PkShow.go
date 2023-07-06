@@ -112,8 +112,9 @@ func PKShow(session rui.Session) rui.View {
 		}
 
 		rui.SetParams(view, fmt.Sprintf("pk%d", pl), rui.Params{
-			rui.Content:    content,
-			rui.HeadHeight: count,
+			rui.Content:     content,
+			rui.HeadHeight:  count,
+			rui.CellPadding: "4px",
 		})
 
 	}

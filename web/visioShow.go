@@ -44,8 +44,9 @@ func VisioShow(session rui.Session) rui.View {
 	}
 
 	rui.SetParams(view, "tablePhases", rui.Params{
-		rui.Content:    content,
-		rui.HeadHeight: count,
+		rui.Content:     content,
+		rui.HeadHeight:  count,
+		rui.CellPadding: "2px",
 	})
 
 	return view

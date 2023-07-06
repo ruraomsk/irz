@@ -1,6 +1,8 @@
 package web
 
 import (
+	"fmt"
+
 	"github.com/anoshenko/rui"
 )
 
@@ -43,32 +45,57 @@ type NowSession struct {
 
 func (d *NowSession) OnStart(session rui.Session) {
 	SessionStatus[session.ID()] = true
-	rui.DebugLog("Session start")
+	rui.DebugLog(fmt.Sprintf("Session start %d", session.ID()))
 }
 
 func (d *NowSession) OnFinish(session rui.Session) {
+	rui.DebugLog(fmt.Sprintf("Session finish %d", session.ID()))
+	_, ok := SessionStatus[session.ID()]
+	if !ok {
+		rui.DebugLog(fmt.Sprintf("Session not started %v", SessionStatus))
+		return
+	}
 	SessionStatus[session.ID()] = false
-	rui.DebugLog("Session finish")
 }
 
 func (d *NowSession) OnResume(session rui.Session) {
+	rui.DebugLog(fmt.Sprintf("Session resume %d", session.ID()))
+	_, ok := SessionStatus[session.ID()]
+	if !ok {
+		rui.DebugLog(fmt.Sprintf("Session not started %v", SessionStatus))
+		return
+	}
 	SessionStatus[session.ID()] = true
-	rui.DebugLog("Session resume")
 }
 
 func (d *NowSession) OnPause(session rui.Session) {
+	rui.DebugLog(fmt.Sprintf("Session pause %d", session.ID()))
+	_, ok := SessionStatus[session.ID()]
+	if !ok {
+		rui.DebugLog(fmt.Sprintf("Session not started %v", SessionStatus))
+		return
+	}
 	SessionStatus[session.ID()] = false
-	rui.DebugLog("Session pause")
 }
 
 func (d *NowSession) OnDisconnect(session rui.Session) {
+	rui.DebugLog(fmt.Sprintf("Session disconect %d", session.ID()))
+	_, ok := SessionStatus[session.ID()]
+	if !ok {
+		rui.DebugLog(fmt.Sprintf("Session not started %v", SessionStatus))
+		return
+	}
 	SessionStatus[session.ID()] = false
-	rui.DebugLog("Session disconnect")
 }
 
 func (d *NowSession) OnReconnect(session rui.Session) {
+	rui.DebugLog(fmt.Sprintf("Session reconect %d", session.ID()))
+	_, ok := SessionStatus[session.ID()]
+	if !ok {
+		rui.DebugLog(fmt.Sprintf("Session not started %v", SessionStatus))
+		return
+	}
 	SessionStatus[session.ID()] = true
-	rui.DebugLog("Session reconnect")
 }
 
 func CreateSession(_ rui.Session) rui.SessionContent {

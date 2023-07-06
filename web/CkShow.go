@@ -54,8 +54,9 @@ func CKShow(session rui.Session) rui.View {
 		}
 
 		rui.SetParams(view, fmt.Sprintf("ck%d", cl), rui.Params{
-			rui.Content:    content,
-			rui.HeadHeight: count,
+			rui.Content:     content,
+			rui.HeadHeight:  count,
+			rui.CellPadding: "8px",
 		})
 
 	}
