@@ -12,9 +12,6 @@ import (
 
 // border = _{ style = solid, width = 1px, color = darkgray },
 const statusText = `
-ListLayout {
-	style = showPage,
-	content = [
 		ListLayout {
 			width = 100%, height = 100%, orientation = vertical, padding = 16px,
 			content = [
@@ -22,10 +19,6 @@ ListLayout {
 					text-color="red",text-align="center",text-size="24px",
 					border = _{ style = solid, width = 1px, color = darkgray },
 					id=titleStatus,text = ""
-				},
-				TextView {
-					id=idDevice,semantics="code",
-					text = "Номер контроллера"
 				},
 				TextView {
 					id=idConnect,semantics="code",
@@ -43,27 +36,94 @@ ListLayout {
 					id=workVisio,semantics="code",
 					text = ""
 				},
+				ListLayout {
+					orientation = horizontal, list-column-gap=16px,
+					content = [
+						TextView {
+							text = "<b>Команды управления от Центра</b>"
+						},
+						TextView {
+							id=idSFDK,text-color=red,
+							text = ""
+						},
+						TextView {
+							id=idDU,text-color=red,
+							text = ""
+						},
+						TextView {
+							id=idPK,text-color=red,
+							text = ""
+						},
+						TextView {
+							id=idCK,text-color=red,
+							text = ""
+						},
+						TextView {
+							id=idNK,text-color=red,
+							text = ""
+						},
+					]
+				},		
+				ListLayout {
+					orientation = horizontal, list-column-gap=16px,
+					content = [
+						TextView {
+							text = "<b>Технология</b>"
+						},
+						TextView {
+							id=idTech,
+							text = ""
+						},
+						TextView {
+							id=idNPK,text-color=green,
+							text = ""
+						},
+						TextView {
+							id=idNCK,text-color=green,
+							text = ""
+						},
+						TextView {
+							id=idNNK,text-color=green,
+							text = ""
+						},
+						TextView {
+							id=idRezim,text-color=green,
+							text = ""
+						},
+						TextView {
+							id=idPhaseDU,text-color=green,
+							text = ""
+						},
+						TextView {
+							id=idPhaseRU,text-color=green,
+							text = ""
+						},
+						TextView {
+							id=idBroken,text-color=red,
+							text = ""
+						},
+
+
+					]
+				},		
 			]
-		},
-	]
-}
+		}
 `
 
 func toString(t time.Time) string {
 	return fmt.Sprintf("%04d/%02d/%02d %02d:%02d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 }
 func makeViewStatus(view rui.View) {
-	rui.Set(view, "titleStatus", "text", fmt.Sprintf("Текущее состояние УСДК %02d:%02d:%02d",
+	rui.Set(view, "titleStatus", "text", fmt.Sprintf("<b>Текущее состояние УСДК %d </b>%02d:%02d:%02d", data.DataValue.Controller.ID,
 		time.Now().Hour(), time.Now().Minute(), time.Now().Second()))
-	rui.Set(view, "idDevice", "text", fmt.Sprintf("Номер контроллера \t%d", data.DataValue.Controller.ID))
 
-	c := fmt.Sprintf("Соединение с сервером %s:%d \t", data.DataValue.Server.Host, data.DataValue.Server.Port)
+	c := fmt.Sprintf("<b>Соединение с сервером %s:%d ", data.DataValue.Server.Host, data.DataValue.Server.Port)
 	if data.DataValue.Controller.StatusConnection {
 		c += fmt.Sprintf("установлено %s обмен %s", toString(data.DataValue.Controller.ConnectTime), toString(data.DataValue.Controller.LastOperation))
 	} else {
 		c += "отсутствует"
 	}
-	rui.Set(view, "idConnect", "text", c)
+	rui.Set(view, "idConnect", "text", c+"</b>")
 
 	c = fmt.Sprintf("Соединение Modbus device %s baud %d parity %s uid %d \t",
 		setup.Set.Modbus.Device, setup.Set.Modbus.BaudRate, setup.Set.Modbus.Parity, setup.Set.Modbus.UId)
@@ -89,7 +149,7 @@ func makeViewStatus(view rui.View) {
 		}
 		rui.Set(view, "workVisio", "text", vs)
 	}
-
+	showTech(view)
 }
 func updaterStatus(view rui.View, session rui.Session) {
 	ticker := time.NewTicker(time.Second)
