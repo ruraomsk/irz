@@ -28,6 +28,8 @@ GridLayout {
 }
 `
 
+var SessionStatus map[int]bool
+
 type Page struct {
 	title   string
 	creator func(session rui.Session) rui.View
@@ -40,26 +42,32 @@ type NowSession struct {
 }
 
 func (d *NowSession) OnStart(session rui.Session) {
+	SessionStatus[session.ID()] = true
 	rui.DebugLog("Session start")
 }
 
 func (d *NowSession) OnFinish(session rui.Session) {
+	SessionStatus[session.ID()] = false
 	rui.DebugLog("Session finish")
 }
 
 func (d *NowSession) OnResume(session rui.Session) {
+	SessionStatus[session.ID()] = true
 	rui.DebugLog("Session resume")
 }
 
 func (d *NowSession) OnPause(session rui.Session) {
+	SessionStatus[session.ID()] = false
 	rui.DebugLog("Session pause")
 }
 
 func (d *NowSession) OnDisconnect(session rui.Session) {
+	SessionStatus[session.ID()] = false
 	rui.DebugLog("Session disconnect")
 }
 
 func (d *NowSession) OnReconnect(session rui.Session) {
+	SessionStatus[session.ID()] = true
 	rui.DebugLog("Session reconnect")
 }
 
@@ -71,7 +79,7 @@ func CreateSession(_ rui.Session) rui.SessionContent {
 		{"Суточные карты", CKShow, nil},
 		{"Недельные карты", NKShow, nil},
 		{"Годовая карта", YearShow, nil},
-		{"Индикатолр отсчета", VisioShow, nil},
+		{"Индикатор отсчета", VisioShow, nil},
 		// {"Состояние КДМ", KDMShow, nil},
 	}
 
@@ -131,6 +139,7 @@ func (d *NowSession) showPage(index int) {
 	}
 }
 func Web() {
+	SessionStatus = make(map[int]bool)
 	rui.ProtocolInDebugLog = false
 	addr := rui.GetLocalIP() + ":8000"
 	// addr := "localhost:8000"

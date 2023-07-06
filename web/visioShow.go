@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/anoshenko/rui"
-	"github.com/ruraomsk/irz/setup"
 	"github.com/ruraomsk/irz/visio"
 )
 
@@ -12,14 +11,6 @@ const visioText = `
 ListLayout {
 	width = 100%, height = 100%, orientation = vertical, padding = 16px,
 	content = [
-		TextView {
-			id=setVisio,semantics="code",
-			text = ""
-		},
-		TextView {
-			id=workVisio,semantics="code",
-			text = ""
-		},
 		TableView {cell-horizontal-align = right,
 			id="tablePhases"},
   ]
@@ -32,22 +23,6 @@ func VisioShow(session rui.Session) rui.View {
 	if view == nil {
 		return nil
 	}
-	if !setup.Set.Visio {
-		rui.Set(view, "setVisio", "text", "Отключена индикация")
-		return view
-	}
-	if visio.Ready {
-		rui.Set(view, "setVisio", "text", "Описание фаз загружено")
-	} else {
-		rui.Set(view, "setVisio", "text", "Описание фаз не загружено (нет связи по Modbus)")
-	}
-	vs := fmt.Sprintf("Связь с индикацией device %s baud %d parity %s ", setup.Set.VisioDevice.Device, setup.Set.VisioDevice.BaudRate, setup.Set.VisioDevice.Parity)
-	if visio.Work {
-		vs += " установлена"
-	} else {
-		vs += " отсутсвует"
-	}
-	rui.Set(view, "workVisio", "text", vs)
 
 	var content [][]any
 	count := 1
