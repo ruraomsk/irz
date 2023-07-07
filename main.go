@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -24,20 +25,27 @@ import (
 
 func init() {
 	setup.Set = new(setup.Setup)
+	setup.ExtSet = new(setup.ExtSetup)
 	if _, err := toml.DecodeFS(resources, "config/base.toml", &setup.Set); err != nil {
 		fmt.Println("Dissmis base.toml")
 		os.Exit(-1)
 		return
 	}
-	if _, err := os.Stat("config.toml"); err == nil {
-		if _, err := toml.DecodeFile("config.toml", &setup.ExtSet); err != nil {
-			fmt.Println("Dissmis config.toml")
-			os.Exit(-1)
-			return
+	if _, err := os.Stat("config.json"); err == nil {
+		file, err := os.ReadFile("config.json")
+		if err == nil {
+			err = json.Unmarshal(file, &setup.ExtSet)
+			setup.Set.Modbus = setup.ExtSet.Modbus
+			setup.Set.Server = setup.ExtSet.Server
+			setup.Set.Visio = setup.ExtSet.Visio
+			setup.Set.VisioDevice = setup.ExtSet.VisioDevice
 		}
-		setup.Set.Modbus = setup.ExtSet.Modbus
-		setup.Set.Server = setup.ExtSet.Server
 	}
+	setup.ExtSet.Modbus = setup.Set.Modbus
+	setup.ExtSet.Server = setup.Set.Server
+	setup.ExtSet.Visio = setup.Set.Visio
+	setup.ExtSet.VisioDevice = setup.Set.VisioDevice
+
 	os.MkdirAll(setup.Set.LogPath, 0777)
 	os.MkdirAll(setup.Set.SetupPudge.DbPath, 0777)
 }

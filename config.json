@@ -1,0 +1,1 @@
+{"server":{"host":"asdu.tech","port":1093},"modbus":{"device":"rtu:///dev/ttyEXTRA2_00","baudrate":19200,"parity":"N","uid":247},"visio":true,"visiodevice":{"device":"/dev/ttyUSB0","baudrate":19200,"parity":"N"}}

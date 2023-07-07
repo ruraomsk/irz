@@ -17,6 +17,9 @@ var mutex sync.Mutex
 var DataValue Common
 var pathCommon string
 
+var SetBase chan any
+var SaveExtSetup chan any
+
 type QInfo struct {
 	TypeDev  int
 	Interval int
@@ -28,17 +31,12 @@ type CommandDU struct {
 	NK int
 	DU int
 }
-type Server struct {
-	Host string `toml:"host"`
-	Port int    `toml:"port"`
-}
 
 type Common struct {
 	Controller pudge.Controller `json:"controller"`
 	Arrays     binding.Arrays
 	change     bool
 	CommandDU  CommandDU
-	Server     Server
 	Connect    bool
 }
 
@@ -69,8 +67,6 @@ func (c *Common) setEmpty() {
 	c.Controller.Arrays = make([]pudge.ArrayPriv, 0)
 	c.Controller.LogLines = make([]pudge.LogLine, 0)
 	c.Arrays = *binding.NewArrays()
-	c.Server.Host = setup.Set.Server.Host
-	c.Server.Port = setup.Set.Server.Port
 }
 func (c *Common) Save() error {
 	mutex.Lock()
@@ -193,6 +189,10 @@ func (c *Common) GetDK() pudge.DK {
 }
 
 func LoadAll() {
+
+	SetBase = make(chan any)
+	SaveExtSetup = make(chan any)
+
 	pathCommon = setup.Set.SetupPudge.DbPath + "common.json"
 	file, err := os.ReadFile(pathCommon)
 	if err != nil {
@@ -240,9 +240,25 @@ func run() {
 			logger.Info.Print("Состояние устройства сохранено")
 			logger.Info.Print("Работа Common завершена")
 			return
+
 		case <-saver.C:
 			DataValue.Save()
 			// logger.Info.Print("Состояние устройства сохранено")
+		case <-SaveExtSetup:
+			file, err := json.Marshal(setup.ExtSet)
+			if err != nil {
+				logger.Error.Printf("При сборке для записи файла config.json %s", err.Error())
+				continue
+			}
+			err = os.WriteFile("config.json", file, 0777)
+			if err != nil {
+				logger.Error.Printf("При записи файла config.json %s", err.Error())
+				continue
+			}
+			os.Exit(100)
+		case <-SetBase:
+			os.Remove(pathCommon)
+			os.Exit(101)
 		}
 	}
 

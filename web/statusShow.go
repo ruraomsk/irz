@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/anoshenko/rui"
@@ -21,9 +22,14 @@ const statusText = `
 					id=titleStatus,text = ""
 				},
 				TextView {
+					id=idBaseSet,text-color=red,
+					text = ""
+				},
+				TextView {
 					id=idConnect,semantics="code",
 					text = "server"
 				},
+
 				TextView {
 					id=idModbus,semantics="code",
 					text = "modbus"
@@ -37,7 +43,7 @@ const statusText = `
 					text = ""
 				},
 				ListLayout {
-					orientation = horizontal, list-column-gap=16px,
+					orientation = horizontal, list-column-gap=16px,padding = 16px,
 					content = [
 						TextView {
 							text = "<b>Команды управления от Центра</b>"
@@ -65,7 +71,7 @@ const statusText = `
 					]
 				},		
 				ListLayout {
-					orientation = horizontal, list-column-gap=16px,
+					orientation = horizontal, list-column-gap=16px,padding = 16px,
 					content = [
 						TextView {
 							text = "<b>Технология</b>"
@@ -106,6 +112,27 @@ const statusText = `
 
 					]
 				},		
+				ListLayout {
+					orientation = horizontal, list-column-gap=16px,padding = 16px,
+					border = _{style=solid,width=4px,color=blue },
+					content = [
+						TextView {
+							text = "<b>Изменение настроек</b>"
+						},
+						Button {
+							id=setBase,content="Установить базовую привязку"
+						},
+						EditView{
+							id=idIP,type=text
+						},
+						NumberPicker {
+							id=idPort,type=editor,min=0,max=32000,value=1090
+						},
+						Button {
+							id=setIP,content="Установить сервер связи"
+						},
+					]
+				},		
 			]
 		}
 `
@@ -117,7 +144,12 @@ func makeViewStatus(view rui.View) {
 	rui.Set(view, "titleStatus", "text", fmt.Sprintf("<b>Текущее состояние УСДК %d </b>%02d:%02d:%02d", data.DataValue.Controller.ID,
 		time.Now().Hour(), time.Now().Minute(), time.Now().Second()))
 
-	c := fmt.Sprintf("<b>Соединение с сервером %s:%d ", data.DataValue.Server.Host, data.DataValue.Server.Port)
+	if data.DataValue.Controller.Base {
+		rui.Set(view, "idBaseSet", "text", "<b>БАЗОВАЯ ПРИВЯЗКА</b>")
+	} else {
+		rui.Set(view, "idBaseSet", "text", "")
+	}
+	c := fmt.Sprintf("<b>Соединение с сервером %s:%d ", setup.Set.Server.Host, setup.Set.Server.Port)
 	if data.DataValue.Controller.StatusConnection {
 		c += fmt.Sprintf("установлено %s обмен %s", toString(data.DataValue.Controller.ConnectTime), toString(data.DataValue.Controller.LastOperation))
 	} else {
@@ -177,5 +209,27 @@ func statusShow(session rui.Session) rui.View {
 	}
 	makeViewStatus(view)
 	go updaterStatus(view, session)
+
+	rui.Set(view, "idIP", "text", setup.ExtSet.Server.Host)
+	rui.Set(view, "idPort", "value", setup.ExtSet.Server.Port)
+	rui.Set(view, "setBase", rui.ClickEvent, func(rui.View) {
+		rui.DebugLog("SetBase!")
+		data.SetBase <- 1
+	})
+	rui.Set(view, "setIP", rui.ClickEvent, func(rui.View) {
+		setup.ExtSet.Server.Host = rui.GetText(view, "idIP")
+		a := rui.Get(view, "idPort", "value")
+		s, ok := a.(string)
+		if ok {
+			setup.ExtSet.Server.Port, _ = strconv.Atoi(s)
+		}
+		f, ok := a.(float64)
+		if ok {
+			setup.ExtSet.Server.Port = int(f)
+		}
+		rui.DebugLog("SetIP!")
+		data.SaveExtSetup <- 1
+	})
+
 	return view
 }

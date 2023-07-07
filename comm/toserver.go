@@ -30,7 +30,7 @@ func ToServer() {
 	errTcp := make(chan net.Conn, 1)
 	for {
 		for !connected {
-			socket, err = net.Dial("tcp", fmt.Sprintf("%s:%d", data.DataValue.Server.Host, data.DataValue.Server.Port))
+			socket, err = net.Dial("tcp", fmt.Sprintf("%s:%d", setup.Set.Server.Host, setup.Set.Server.Port))
 			if err != nil {
 				logger.Error.Printf("Error dial %s %s", setup.Set.Server.Host, err.Error())
 				slp := time.NewTimer(10 * time.Second)
