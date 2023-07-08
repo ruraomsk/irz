@@ -2,9 +2,12 @@ package web
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/anoshenko/rui"
 )
+
+var mutex sync.Mutex
 
 const rootViewText = `
 GridLayout {
@@ -126,6 +129,8 @@ func (d *NowSession) CreateRootView(session rui.Session) rui.View {
 	return d.rootView
 }
 func (d *NowSession) clickMenuButton() {
+	mutex.Lock()
+	defer mutex.Unlock()
 	items := make([]string, len(d.pages))
 	for i, page := range d.pages {
 		items[i] = page.title
@@ -150,6 +155,9 @@ func (d *NowSession) clickMenuButton() {
 }
 
 func (d *NowSession) showPage(index int) {
+	// mutex.Lock()
+	// defer mutex.Unlock()
+
 	if index < 0 || index >= len(d.pages) {
 		return
 	}

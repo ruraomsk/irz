@@ -11,6 +11,10 @@ const NkText = `
 `
 
 func NKShow(session rui.Session) rui.View {
+
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	view := rui.CreateViewFromText(session, NkText)
 	if view == nil {
 		return nil

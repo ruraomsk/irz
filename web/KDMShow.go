@@ -26,6 +26,9 @@ GridLayout {
 `
 
 func KDMShow(session rui.Session) rui.View {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	view := rui.CreateViewFromText(session, KDMText)
 	if view == nil {
 		return nil

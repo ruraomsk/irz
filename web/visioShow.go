@@ -19,6 +19,9 @@ ListLayout {
 `
 
 func VisioShow(session rui.Session) rui.View {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	view := rui.CreateViewFromText(session, visioText)
 	if view == nil {
 		return nil

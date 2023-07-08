@@ -2,5 +2,5 @@
 # the system init finished. By default this file does nothing.
 echo "Start controller"
 cd /root
-./irz 
+./goirz.sh 
 #exit 0

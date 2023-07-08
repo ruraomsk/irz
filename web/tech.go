@@ -42,5 +42,7 @@ func showTech(view rui.View) {
 	rui.Set(view, "idPhaseRU", "text", fmt.Sprintf("Фаза РУ %s", getPhaseRU(data.DataValue.Controller)))
 	if data.DataValue.Controller.DK.EDK != 0 {
 		rui.Set(view, "idBroken", "text", fmt.Sprintf("ОШИБКА %s", getBroken(data.DataValue.Controller)))
+	} else {
+		rui.Set(view, "idBroken", "text", "")
 	}
 }

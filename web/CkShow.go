@@ -29,6 +29,8 @@ TabsLayout { id = tabsCK, width = 100%, height = 100%, tabs = top, tab-close-but
 `
 
 func CKShow(session rui.Session) rui.View {
+	mutex.Lock()
+	defer mutex.Unlock()
 	view := rui.CreateViewFromText(session, CkText)
 	if view == nil {
 		return nil

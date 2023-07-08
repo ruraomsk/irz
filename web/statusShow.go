@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/anoshenko/rui"
+	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/irz/data"
 	"github.com/ruraomsk/irz/setup"
 	"github.com/ruraomsk/irz/visio"
@@ -138,11 +139,15 @@ const statusText = `
 `
 
 func toString(t time.Time) string {
+	t = t.Add(time.Duration(data.DataValue.Arrays.TimeDivice.TimeZone) * time.Hour)
 	return fmt.Sprintf("%04d/%02d/%02d %02d:%02d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 }
 func makeViewStatus(view rui.View) {
+	mutex.Lock()
+	defer mutex.Unlock()
+	t := time.Now().Add(time.Duration(data.DataValue.Arrays.TimeDivice.TimeZone) * time.Hour)
 	rui.Set(view, "titleStatus", "text", fmt.Sprintf("<b>Текущее состояние УСДК %d </b>%02d:%02d:%02d", data.DataValue.Controller.ID,
-		time.Now().Hour(), time.Now().Minute(), time.Now().Second()))
+		t.Hour(), t.Minute(), t.Second()))
 
 	if data.DataValue.Controller.Base {
 		rui.Set(view, "idBaseSet", "text", "<b>БАЗОВАЯ ПРИВЯЗКА</b>")
@@ -213,7 +218,7 @@ func statusShow(session rui.Session) rui.View {
 	rui.Set(view, "idIP", "text", setup.ExtSet.Server.Host)
 	rui.Set(view, "idPort", "value", setup.ExtSet.Server.Port)
 	rui.Set(view, "setBase", rui.ClickEvent, func(rui.View) {
-		rui.DebugLog("SetBase!")
+		logger.Info.Println("Утановили базовую привязку")
 		data.SetBase <- 1
 	})
 	rui.Set(view, "setIP", rui.ClickEvent, func(rui.View) {
@@ -227,7 +232,7 @@ func statusShow(session rui.Session) rui.View {
 		if ok {
 			setup.ExtSet.Server.Port = int(f)
 		}
-		rui.DebugLog("SetIP!")
+		logger.Info.Printf("Изменили центр на %s:%d", setup.ExtSet.Server.Host, setup.ExtSet.Server.Port)
 		data.SaveExtSetup <- 1
 	})
 

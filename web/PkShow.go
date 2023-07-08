@@ -30,6 +30,9 @@ const PkText = `
 `
 
 func PKShow(session rui.Session) rui.View {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	view := rui.CreateViewFromText(session, PkText)
 	if view == nil {
 		return nil

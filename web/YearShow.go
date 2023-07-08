@@ -11,6 +11,9 @@ TableView {cell-horizontal-align = right,
 `
 
 func YearShow(session rui.Session) rui.View {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	view := rui.CreateViewFromText(session, YearText)
 	if view == nil {
 		return nil

@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/bin/ash
 while true
 do
     ./irz
-done    
+done 
