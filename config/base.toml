@@ -7,8 +7,8 @@ immitator=false     #если истина то запускать имитат�
 visio=false			#если истино то есть индикаторы обратного отсчета
 [modbus]
 	# device="rtu:///dev/ttyUSB0"
-	# device="rtu:///dev/ttyEXTRA2_00"
-	device="rtu:///dev/ttyS1"
+	device="rtu:///dev/ttyEXTRA2_00"
+	# device="rtu:///dev/ttyS2"
 	baudrate=19200
 	parity="N"
 	uid=247
