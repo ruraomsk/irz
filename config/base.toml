@@ -1,47 +1,48 @@
-logpath="log/"
-id=100
-# id=198460			#Номер устройства дома
+logpath = "log/"
+# id = 100
+id = 198460 #Номер устройства дома
 # id=230412
 # id=108682			#Номер в Элисте
-immitator=false     #если истина то запускать имитатор 
-visio=false			#если истино то есть индикаторы обратного отсчета
+immitator = false #если истина то запускать имитатор 
+visio = false     #если истино то есть индикаторы обратного отсчета
 [modbus]
-	# device="rtu:///dev/ttyUSB0"
-	device="rtu:///dev/ttyEXTRA2_00"
-	# device="rtu:///dev/ttyS2"
-	baudrate=19200
-	parity="N"
-	uid=247
+# device="rtu:///dev/ttyUSB0"
+# device = "rtu:///dev/ttyEXTRA2_00"
+device = "rtu:///dev/com1"
+baudrate = 19200
+parity = "N"
+uid = 247
 [visiodevice]
-	device="/dev/ttyUSB0"
-	#device="rtu:///dev/ttyEXTRA2_00"
-	baudrate=19200
-	parity="N"
+device = "/dev/ttyUSB0"
+#device="rtu:///dev/ttyEXTRA2_00"
+baudrate = 19200
+parity = "N"
 [server]
-	host="asdu.tech"
-	# host="10.151.50.126"
-	# host="192.168.2.156"
-	port=1093
+# host = "asdu.tech"
+# host = "10.151.50.126"
+# host = "192.168.2.156"
+host = "192.168.88.2"
+port = 1093
 [watchdog]
-	step=60 		#цикл watchdog в секундах
+step = 60 #цикл watchdog в секундах
 [pudge]
-	dbpath="db/"
+dbpath = "db/"
 [hardware]
-	step=100		#цикл опроса датчиков миллисекунд
-	connect="127.0.0.1"
-	sport=5000
-	count=3
-	longkk=3		#Длительность кругом красный
-	pinos=1			#Номер входа ОС
-	pinyb=2			#Номер входа ЖМ
+step = 100            #цикл опроса датчиков миллисекунд
+connect = "127.0.0.1"
+sport = 5000
+count = 3
+longkk = 3            #Длительность кругом красный
+pinos = 1             #Номер входа ОС
+pinyb = 2             #Номер входа ЖМ
 [netware]
-	port=8000       ## порт откуда ждем настройки
+port = 8000 ## порт откуда ждем настройки
 [rtc]
 [vpu]
-	step=100		#цикл опроса  миллисекунд
-	connect="127.0.0.1"
-	sport=5010
+step = 100            #цикл опроса  миллисекунд
+connect = "127.0.0.1"
+sport = 5010
 [counter]
-	step=100		#цикл опроса  миллисекунд
-	connect="127.0.0.1"
-	sport=5011
+step = 100            #цикл опроса  миллисекунд
+connect = "127.0.0.1"
+sport = 5011

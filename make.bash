@@ -6,7 +6,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 echo 'Copy irz to device'
-scp irz root@192.168.2.1:/root
+scp irz root@192.168.88.1:/root
 #scp config.toml root@192.168.2.1:/root
 #scp goirz.sh root@192.168.2.1:/root
 # echo 'Copy rc.local to device'

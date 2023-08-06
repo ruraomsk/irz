@@ -304,7 +304,7 @@ func setLocal() error {
 		// снимаем команду отключения
 		err = client.WriteRegister(0x0a, 0)
 		if err != nil {
-			return fmt.Errorf("modbus write %v", err.Error())
+			return fmt.Errorf("modbus write Снять ОС setLocal %v", err.Error())
 		}
 	}
 
@@ -312,19 +312,19 @@ func setLocal() error {
 		// снимаем команду перейти в ЖМ
 		err = client.WriteRegister(0x0d, 0)
 		if err != nil {
-			return fmt.Errorf("modbus write %v", err.Error())
+			return fmt.Errorf("modbus write Снять ЖМ setLocal %v", err.Error())
 		}
 		return nil
 	}
 	if statusKdm.isSetPhase {
 		err = client.WriteRegister(0x0c, 0)
 		if err != nil {
-			return fmt.Errorf("modbus write %v", err.Error())
+			return fmt.Errorf("modbus write Снять Фазжу setLocal %v", err.Error())
 		}
 	}
 	err = client.WriteRegister(0x08, 0)
 	if err != nil {
-		return fmt.Errorf("modbus write %v", err.Error())
+		return fmt.Errorf("modbus write Снять 0x08 setLocal %v", err.Error())
 	}
 	return nil
 }
@@ -332,30 +332,30 @@ func setPhase(phase int, lenght int) error {
 	// включаем команду перейти в РУ
 	err = client.WriteRegister(0x0c, 1)
 	if err != nil {
-		return fmt.Errorf("modbus write %v", err.Error())
+		return fmt.Errorf("modbus write РУ %v", err.Error())
 	}
 	// ставим время фазы в РУ
 	err = client.WriteRegister(0x0c21, uint16(lenght))
 	if err != nil {
-		return fmt.Errorf("modbus write %v", err.Error())
+		return fmt.Errorf("modbus write время %v", err.Error())
 	}
 	// Передаем номер фазы
 	err = client.WriteRegister(0x0b, uint16(phase))
 	if err != nil {
-		return fmt.Errorf("modbus write %v", err.Error())
+		return fmt.Errorf("modbus write Фаза %v", err.Error())
 	}
 	if statusKdm.isBlink {
 		// снимаем команду перейти в ЖМ
 		err = client.WriteRegister(0x0d, 0)
 		if err != nil {
-			return fmt.Errorf("modbus write %v", err.Error())
+			return fmt.Errorf("modbus write Снять ЖМ %v", err.Error())
 		}
 	}
 	if statusKdm.isOS {
 		// снимаем команду отключения
 		err = client.WriteRegister(0x0a, 0)
 		if err != nil {
-			return fmt.Errorf("modbus write %v", err.Error())
+			return fmt.Errorf("modbus write Снять ОС %v", err.Error())
 		}
 	}
 	return nil
@@ -377,7 +377,7 @@ func getStatus() error {
 	var reg16s []uint16
 	reg16s, err = client.ReadRegisters(0, 0x16, modbus.HOLDING_REGISTER)
 	if err != nil {
-		return fmt.Errorf("modbus read %v", err.Error())
+		return fmt.Errorf("modbus read Статус %v", err.Error())
 	}
 	statusKdm.isBlink = false
 	if reg16s[0x0d] != 0 {
