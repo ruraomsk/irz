@@ -31,7 +31,7 @@ func (t *toSend) makerYell(d vdata) {
 var toTo toSend
 
 func Visio() {
-	if !setup.Set.Visio {
+	if !setup.Set.VisioDevice.Visio {
 		for {
 			select {
 			case <-kdm.InfoChan:

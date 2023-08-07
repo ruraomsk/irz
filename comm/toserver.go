@@ -41,6 +41,8 @@ func ToServer() {
 						logger.Info.Printf("Пропущена команда %d", cmd)
 					case <-slp.C:
 						to = false
+					case s := <-data.Statistics:
+						logger.Info.Printf("Пропущена отправка статистики %v", s)
 					}
 				}
 				continue
@@ -58,6 +60,8 @@ func ToServer() {
 		work := true
 		for work {
 			select {
+			case stat := <-data.Statistics:
+				toServer <- makeStatistics(stat)
 			case cmd := <-data.ToServer:
 				// logger.Info.Print("Просят по СФДК отправить")
 				// logger.Debug.Printf("Пришла команда %d", cmd)
@@ -109,26 +113,6 @@ func ToServer() {
 	}
 
 	// data.DataValue.SetConnected(true)
-}
-func makeStatus() transport.HeaderDevice {
-	var hd = transport.CreateHeaderDevice(data.DataValue.Controller.ID, 0, 0, 1)
-	mss := make([]transport.SubMessage, 0)
-	var ms transport.SubMessage
-	ms.Set0x12Device(&data.DataValue.Controller)
-	mss = append(mss, ms)
-	ms.Set0x11Device(&data.DataValue.Controller)
-	mss = append(mss, ms)
-	hd.UpackMessages(mss)
-	return hd
-}
-func makeSFDKreplay() transport.HeaderDevice {
-	var hd = transport.CreateHeaderDevice(data.DataValue.Controller.ID, 0, 0, 1)
-	mss := make([]transport.SubMessage, 0)
-	var ms transport.SubMessage
-	ms.Set0x12Device(&data.DataValue.Controller)
-	mss = append(mss, ms)
-	hd.UpackMessages(mss)
-	return hd
 }
 
 func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
@@ -217,22 +201,4 @@ func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
 		hd.UpackMessages(mss)
 	}
 	return hd, need
-}
-func makeHeaderForConnect() transport.HeaderDevice {
-	var hd = transport.CreateHeaderDevice(data.DataValue.Controller.ID, 0, 1, 0x7f)
-
-	mss := make([]transport.SubMessage, 0)
-	var ms transport.SubMessage
-	ms.Set0x1DDevice(&data.DataValue.Controller)
-	mss = append(mss, ms)
-	// ms.Set0x10Device(&data.DataValue.Controller)
-	// mss = append(mss, ms)
-	ms.Set0x12Device(&data.DataValue.Controller)
-	mss = append(mss, ms)
-	// ms.Set0x1BDevice(&data.DataValue.Controller)
-	// mss = append(mss, ms)
-	// ms.Set0x11Device(&data.DataValue.Controller)
-	// mss = append(mss, ms)
-	hd.UpackMessages(mss)
-	return hd
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/ruraomsk/irz/data"
 	"github.com/ruraomsk/irz/device"
 	"github.com/ruraomsk/irz/kdm"
+	"github.com/ruraomsk/irz/radar"
 	"github.com/ruraomsk/irz/setup"
 	"github.com/ruraomsk/irz/stat"
 	"github.com/ruraomsk/irz/visio"
@@ -35,17 +36,10 @@ func init() {
 		file, err := os.ReadFile("config.json")
 		if err == nil {
 			err = json.Unmarshal(file, &setup.ExtSet)
-			setup.Set.Modbus = setup.ExtSet.Modbus
-			setup.Set.Server = setup.ExtSet.Server
-			setup.Set.Visio = setup.ExtSet.Visio
-			setup.Set.VisioDevice = setup.ExtSet.VisioDevice
+			setup.Set.Update(*setup.ExtSet)
 		}
 	}
-	setup.ExtSet.Modbus = setup.Set.Modbus
-	setup.ExtSet.Server = setup.Set.Server
-	setup.ExtSet.Visio = setup.Set.Visio
-	setup.ExtSet.VisioDevice = setup.Set.VisioDevice
-
+	setup.ExtSet.Update(*setup.Set)
 	os.MkdirAll(setup.Set.LogPath, 0777)
 	os.MkdirAll(setup.Set.SetupPudge.DbPath, 0777)
 }
@@ -70,6 +64,8 @@ func main() {
 	}
 	go visio.Visio()
 	go stat.Statistics()
+	go radar.Radar()
+
 	rui.AddEmbedResources(&resources)
 	go web.Web()
 

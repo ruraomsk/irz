@@ -8,6 +8,7 @@ import (
 	"github.com/anoshenko/rui"
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/irz/data"
+	"github.com/ruraomsk/irz/radar"
 	"github.com/ruraomsk/irz/setup"
 	"github.com/ruraomsk/irz/visio"
 )
@@ -34,6 +35,10 @@ const statusText = `
 				TextView {
 					id=idModbus,semantics="code",
 					text = "modbus"
+				},
+				TextView {
+					id=setModbusRadar,semantics="code",
+					text = "modbusRadar"
 				},
 				TextView {
 					id=setVisio,semantics="code",
@@ -170,7 +175,12 @@ func makeViewStatus(view rui.View) {
 		c += "отсутствует"
 	}
 	rui.Set(view, "idModbus", "text", c)
-	if !setup.Set.Visio {
+	if !setup.Set.ModbusRadar.Radar {
+		rui.Set(view, "setModbusRadar", "text", "Оключен прием данных от радаров")
+	} else {
+		rui.Set(view, "setModbusRadar", "text", "От радаров : "+radar.GetValues())
+	}
+	if !setup.Set.VisioDevice.Visio {
 		rui.Set(view, "setVisio", "text", "Отключена индикация")
 	} else {
 		if visio.Ready {

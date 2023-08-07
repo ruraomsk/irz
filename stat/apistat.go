@@ -74,7 +74,7 @@ func makerStat(head SendStat) {
 		}
 		if len(r.Datas) > 0 {
 			// logger.Debug.Printf("Послали статистику по %d Не забыть написать отправку", TypeStat)
-			// data.Statistics <- r
+			data.Statistics <- r
 		}
 	}
 	statistics.ClearInfo()

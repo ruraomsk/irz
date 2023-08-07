@@ -4,7 +4,6 @@ id = 198460 #Номер устройства дома
 # id=230412
 # id=108682			#Номер в Элисте
 immitator = false #если истина то запускать имитатор 
-visio = false     #если истино то есть индикаторы обратного отсчета
 [modbus]
 # device="rtu:///dev/ttyUSB0"
 # device = "rtu:///dev/ttyEXTRA2_00"
@@ -12,7 +11,13 @@ device = "rtu:///dev/com1"
 baudrate = 19200
 parity = "N"
 uid = 247
+[modbusradar]
+radar = true #если истинно нужно открывать прием сигналов радара
+port = 5002
+id = 1
+chanels = 16
 [visiodevice]
+visio = false           #если истино то есть индикаторы обратного отсчета
 device = "/dev/ttyUSB0"
 #device="rtu:///dev/ttyEXTRA2_00"
 baudrate = 19200
