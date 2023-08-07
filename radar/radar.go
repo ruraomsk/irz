@@ -27,6 +27,7 @@ func Radar() {
 	}
 	eh = &handler{uptime: time.Unix(0, 0)}
 	go modbusServer()
+	go pusher()
 	work = true
 	ticker := time.NewTicker(time.Second)
 	for {
@@ -67,7 +68,7 @@ var err error
 
 func modbusServer() {
 	server, err = modbus.NewServer(&modbus.ServerConfiguration{
-		URL:        "tcp://*:5002",
+		URL:        fmt.Sprintf("tcp://0.0.0.0:%d", setup.Set.ModbusRadar.Port),
 		Timeout:    30 * time.Second,
 		MaxClients: 5,
 	}, eh)
