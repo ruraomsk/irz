@@ -26,7 +26,7 @@ type nowLocal struct {
 	sec  int
 }
 
-var dk = pudge.DK{RDK: 5, FDK: 0, DDK: 4, EDK: 0, PDK: false, EEDK: 0, ODK: false, LDK: 0, FTUDK: 0, TDK: 0, FTSDK: 0, TTCDK: 0}
+var dk = pudge.DK{RDK: 5, FDK: 1, DDK: data.USDK, EDK: 0, PDK: false, EEDK: 0, ODK: false, LDK: 0, FTUDK: 0, TDK: 0, FTSDK: 0, TTCDK: 0}
 var endDUPhase time.Timer
 var toPlan chan data.StatusDevice
 var nowPlan = 0
@@ -38,10 +38,14 @@ var isDUPhase = false
 func Worker() {
 	toPlan = make(chan data.StatusDevice, 100)
 	endPlan = make(chan interface{})
-	dk.EDK = 0
-	dk.FDK = 1
-	dk.DDK = data.USDK
 	data.DataValue.SetDK(dk)
+	for !data.DataValue.Connect {
+		dk = data.DataValue.GetDK()
+		dk.EDK = 11
+		data.DataValue.SetDK(dk)
+		time.Sleep(1 * time.Second)
+	}
+
 	if data.DataValue.Controller.Base {
 		data.ToDevice <- 0
 		data.ToServer <- 0
@@ -57,7 +61,6 @@ func Worker() {
 				dk.EDK = 11
 				dk.DDK = 8
 				data.DataValue.SetDK(dk)
-				data.ToServer <- 0
 				continue
 			}
 			// logger.Info.Printf("Команда %v", cmd)
@@ -133,7 +136,6 @@ func Worker() {
 				dk.EDK = 11
 				dk.DDK = 8
 				data.DataValue.SetDK(dk)
-				data.ToServer <- 0
 				continue
 			}
 			//Перестали удерживать ДУ
@@ -145,7 +147,6 @@ func Worker() {
 				dk.EDK = 11
 				dk.DDK = 8
 				data.DataValue.SetDK(dk)
-				data.ToServer <- 0
 				continue
 			}
 			stopPlan()
@@ -158,7 +159,6 @@ func Worker() {
 				dk.EDK = 11
 				dk.DDK = 8
 				data.DataValue.SetDK(dk)
-				data.ToServer <- 0
 				continue
 			}
 			choicePlan()
