@@ -27,7 +27,7 @@ func Radar() {
 	}
 	eh = &handler{uptime: time.Unix(0, 0)}
 	go modbusServer()
-	go pusher()
+	// go pusher()
 	work = true
 	ticker := time.NewTicker(time.Second)
 	for {
