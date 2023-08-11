@@ -12,9 +12,11 @@ baudrate = 19200
 parity = "N"
 uid = 247
 [modbusradar]
-radar = true #если истинно нужно открывать прием сигналов радара
-port = 5002
-id = 1
+radar = true           #если истинно нужно открывать прием сигналов радара
+master = true
+host = "81.95.134.121"
+port = 515001
+id = 11
 chanels = 16
 [visiodevice]
 visio = false           #если истино то есть индикаторы обратного отсчета

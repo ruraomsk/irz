@@ -15,20 +15,33 @@ var work = false
 
 func GetValues() string {
 	if !work {
-		return "Не запущен пока"
+		if setup.Set.ModbusRadar.Master {
+			return "Нет связи с сервером"
+		}
+		return "Север еще не запущен"
 	}
 	eh.lock.Lock()
 	defer eh.lock.Unlock()
-	return fmt.Sprintf("%s %v", eh.uptime.String(), eh.holding)
+	return fmt.Sprintf("%s %v", eh.uptime.Format("15:04:05"), eh.holding)
+}
+func GetStatus() string {
+	if setup.Set.ModbusRadar.Master {
+		return fmt.Sprintf("master for %s:%d id=%d", setup.Set.ModbusRadar.Host, setup.Set.ModbusRadar.Port, setup.Set.ModbusRadar.ID)
+	} else {
+		return fmt.Sprintf("slave port %d id=%d", setup.Set.ModbusRadar.Port, setup.Set.ModbusRadar.ID)
+	}
 }
 func Radar() {
 	if !setup.Set.ModbusRadar.Radar {
 		return
 	}
 	eh = &handler{uptime: time.Unix(0, 0)}
-	go modbusServer()
+	if setup.Set.ModbusRadar.Master {
+		go modbusMaster()
+	} else {
+		go modbusServer()
+	}
 	// go pusher()
-	work = true
 	ticker := time.NewTicker(time.Second)
 	for {
 		<-ticker.C
@@ -76,14 +89,63 @@ func modbusServer() {
 		logger.Error.Printf("Не могу создать сервер %v", err)
 		return
 	}
+
 	err = server.Start()
 	if err != nil {
 		logger.Error.Printf("Не могу запустить сервер %v", err)
 		return
 	}
+	work = true
 	ticker := time.NewTicker(time.Second)
 	for {
 		<-ticker.C
 	}
 
+}
+func modbusMaster() {
+	var client *modbus.ModbusClient
+	var err error
+
+	client, err = modbus.NewClient(&modbus.ClientConfiguration{
+		URL:     fmt.Sprintf("tcp://%s:%d", setup.Set.ModbusRadar.Host, setup.Set.ModbusRadar.Port),
+		Timeout: 1 * time.Second,
+	})
+
+	if err != nil {
+		logger.Error.Println(err.Error())
+		return
+	}
+	client.SetUnitId(uint8(setup.Set.ModbusRadar.ID))
+	for {
+		for {
+			err = client.Open()
+			if err != nil {
+				logger.Error.Println(err.Error())
+				time.Sleep(5 * time.Second)
+				continue
+			}
+			break
+		}
+		logger.Info.Printf("connecting....%s:%d", setup.Set.ModbusRadar.Host, setup.Set.ModbusRadar.Port)
+		work = true
+		ticker := time.NewTicker(time.Second)
+		for {
+			<-ticker.C
+			reg16, err := client.ReadRegisters(0, uint16(setup.Set.ModbusRadar.Chanels), modbus.HOLDING_REGISTER)
+			if err != nil {
+				work = false
+				logger.Error.Printf("modbus to %s:%d %s", setup.Set.ModbusRadar.Host, setup.Set.ModbusRadar.Port, err.Error())
+				client.Close()
+				ticker.Stop()
+				time.Sleep(5 * time.Second)
+				break
+			}
+			eh.lock.Lock()
+			for i := 0; i < len(eh.holding); i++ {
+				eh.holding[i] = reg16[i]
+			}
+			eh.uptime = time.Now()
+			eh.lock.Unlock()
+		}
+	}
 }

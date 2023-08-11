@@ -178,7 +178,7 @@ func makeViewStatus(view rui.View) {
 	if !setup.Set.ModbusRadar.Radar {
 		rui.Set(view, "setModbusRadar", "text", "Оключен прием данных от радаров")
 	} else {
-		rui.Set(view, "setModbusRadar", "text", "От радаров : "+radar.GetValues())
+		rui.Set(view, "setModbusRadar", "text", fmt.Sprintf("От радаров (%s): %s ", radar.GetStatus(), radar.GetValues()))
 	}
 	if !setup.Set.VisioDevice.Visio {
 		rui.Set(view, "setVisio", "text", "Отключена индикация")

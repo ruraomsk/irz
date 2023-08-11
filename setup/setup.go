@@ -32,10 +32,12 @@ type Modbus struct {
 	UId      int    `toml:"uid" json:"uid"`
 }
 type ModbusRadar struct {
-	Radar   bool `toml:"radar" json:"radar"`
-	Port    int  `toml:"port" json:"port"`
-	ID      int  `toml:"id" json:"id"`
-	Chanels int  `toml:"chanels" json:"chanels"`
+	Radar   bool   `toml:"radar" json:"radar"`
+	Master  bool   `toml:"master" json:"master"`
+	Host    string `toml:"host" json:"host"`
+	Port    int    `toml:"port" json:"port"`
+	ID      int    `toml:"id" json:"id"`
+	Chanels int    `toml:"chanels" json:"chanels"`
 }
 
 type VisioDevice struct {
