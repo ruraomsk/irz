@@ -9,11 +9,25 @@ import (
 )
 
 type handler struct {
-	lock    sync.Mutex
-	uptime  time.Time
-	holding [16]uint16
+	lock   sync.Mutex
+	uptime time.Time
+	dates  [16]uint16
+	reg16  [4]uint16
 }
 
+// reg16 to holdig
+func (h *handler) unpack() {
+	k := 0
+	j := 0
+	for i := 0; i < setup.Set.ModbusRadar.Chanels; i++ {
+		h.dates[i] = (h.reg16[k] >> j) & 0xf
+		j += 4
+		if j > 12 {
+			j = 0
+			k++
+		}
+	}
+}
 func (h *handler) HandleCoils(req *modbus.CoilsRequest) (res []bool, err error) {
 	err = modbus.ErrIllegalFunction
 	return
@@ -34,7 +48,7 @@ func (h *handler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 		return
 	}
 
-	if int(req.Addr)+int(req.Quantity) > len(h.holding) {
+	if int(req.Addr)+int(req.Quantity) > len(h.reg16) {
 		err = modbus.ErrIllegalDataAddress
 		return
 	}
@@ -44,9 +58,9 @@ func (h *handler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 	}
 	for i := 0; i < int(req.Quantity); i++ {
 		if req.IsWrite {
-			h.holding[int(req.Addr)+i] = req.Args[i]
+			h.reg16[int(req.Addr)+i] = req.Args[i]
 		}
-		res = append(res, h.holding[int(req.Addr)+i])
+		res = append(res, h.reg16[int(req.Addr)+i])
 	}
 	return
 }

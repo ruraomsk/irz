@@ -22,7 +22,7 @@ func GetValues() string {
 	}
 	eh.lock.Lock()
 	defer eh.lock.Unlock()
-	return fmt.Sprintf("%s %v", eh.uptime.Format("15:04:05"), eh.holding)
+	return fmt.Sprintf("%s %v", eh.uptime.Format("15:04:05"), eh.dates)
 }
 func GetStatus() string {
 	if setup.Set.ModbusRadar.Master {
@@ -46,6 +46,7 @@ func Radar() {
 	for {
 		<-ticker.C
 		eh.lock.Lock()
+		eh.unpack()
 		var send []stat.OneTick
 		if time.Now().Sub(eh.uptime).Seconds() > 2 {
 			send = badStatistics()
@@ -71,7 +72,7 @@ func goodStatistics() []stat.OneTick {
 	r := make([]stat.OneTick, 0)
 	t := time.Now()
 	for i := 0; i < setup.Set.ModbusRadar.Chanels; i++ {
-		r = append(r, stat.OneTick{Nomber: i + 3, Value: stat.Value{Status: 0, Time: t, Value: int(eh.holding[i])}})
+		r = append(r, stat.OneTick{Nomber: i + 3, Value: stat.Value{Status: 0, Time: t, Value: int(eh.dates[i])}})
 	}
 	return r
 }
@@ -131,7 +132,7 @@ func modbusMaster() {
 		ticker := time.NewTicker(time.Second)
 		for {
 			<-ticker.C
-			reg16, err := client.ReadRegisters(0, uint16(setup.Set.ModbusRadar.Chanels), modbus.HOLDING_REGISTER)
+			reg16, err := client.ReadRegisters(0, uint16(len(eh.reg16)), modbus.HOLDING_REGISTER)
 			if err != nil {
 				work = false
 				logger.Error.Printf("modbus to %s:%d %s", setup.Set.ModbusRadar.Host, setup.Set.ModbusRadar.Port, err.Error())
@@ -141,8 +142,8 @@ func modbusMaster() {
 				break
 			}
 			eh.lock.Lock()
-			for i := 0; i < len(eh.holding); i++ {
-				eh.holding[i] = reg16[i]
+			for i := 0; i < len(eh.dates); i++ {
+				eh.reg16[i] = reg16[i]
 			}
 			eh.uptime = time.Now()
 			eh.lock.Unlock()
