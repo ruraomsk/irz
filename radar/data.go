@@ -1,6 +1,7 @@
 package radar
 
 import (
+	"math/rand"
 	"sync"
 	"time"
 
@@ -56,11 +57,23 @@ func (h *handler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 	if req.IsWrite {
 		h.uptime = time.Now()
 	}
-	for i := 0; i < int(req.Quantity); i++ {
-		if req.IsWrite {
-			h.reg16[int(req.Addr)+i] = req.Args[i]
+	if !setup.Set.ModbusRadar.Debug {
+		for i := 0; i < int(req.Quantity); i++ {
+			if req.IsWrite {
+				h.reg16[int(req.Addr)+i] = req.Args[i]
+			}
+			res = append(res, h.reg16[int(req.Addr)+i])
 		}
-		res = append(res, h.reg16[int(req.Addr)+i])
+	} else {
+		for i := 0; i < int(req.Quantity); i++ {
+			if !req.IsWrite {
+				h.reg16[int(req.Addr)+i] = 0
+				for l := 0; l < 4; l++ {
+					h.reg16[int(req.Addr)+i] |= uint16(((rand.Intn(3) >> (l * 4)) & 0xf))
+				}
+			}
+			res = append(res, h.reg16[int(req.Addr)+i])
+		}
 	}
 	return
 }

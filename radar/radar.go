@@ -37,8 +37,16 @@ func Radar() {
 	}
 	eh = &handler{uptime: time.Unix(0, 0)}
 	if setup.Set.ModbusRadar.Master {
+		if setup.Set.ModbusRadar.Debug {
+			go pusherSlave()
+			time.Sleep(time.Second)
+		}
 		go modbusMaster()
 	} else {
+		if setup.Set.ModbusRadar.Debug {
+			go pusherMaster()
+			time.Sleep(time.Second)
+		}
 		go modbusServer()
 	}
 	// go pusher()

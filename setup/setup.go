@@ -34,6 +34,7 @@ type Modbus struct {
 type ModbusRadar struct {
 	Radar   bool   `toml:"radar" json:"radar"`
 	Master  bool   `toml:"master" json:"master"`
+	Debug   bool   `toml:"debug" json:"debug"`
 	Host    string `toml:"host" json:"host"`
 	Port    int    `toml:"port" json:"port"`
 	ID      int    `toml:"id" json:"id"`
