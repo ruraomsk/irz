@@ -18,7 +18,7 @@ debug = true
 # host = "81.95.134.121"
 host = "127.0.0.1"
 
-port = 515001
+port = 15001
 id = 11
 chanels = 16
 [visiodevice]

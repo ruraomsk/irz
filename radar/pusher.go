@@ -80,7 +80,6 @@ func pusherSlave() {
 		return
 	}
 	ticker := time.NewTicker(time.Second)
-	logger.Info.Println("")
 	for {
 		<-ticker.C
 	}

@@ -67,9 +67,8 @@ func Kdm() {
 	ReplayChan = make(chan Replay)
 	WriteCmdChan = make(chan WriteCmd)
 	InfoChan = make(chan Info)
-
 	statusKdm.SetKeys = make([]uint16, 32)
-
+	count := 0
 	for !State.Connect {
 		data.DataValue.Connect = false
 		time.Sleep(time.Second)
@@ -86,15 +85,17 @@ func Kdm() {
 		if err != nil {
 			logger.Error.Printf("modbus %v", err.Error())
 			continue
-			// error out if client creation failed
 		}
 		client.SetUnitId(uint8(setup.Set.Modbus.UId))
-		// now that the client is created and configured, attempt to connect
 		err = client.Open()
 		if err != nil {
-			logger.Error.Printf("modbus open %v", err.Error())
+			if (count % 1000) == 0 {
+				logger.Error.Printf("modbus open %v", err.Error())
+			}
+			count++
 			continue
 		}
+		count = 0
 		workModbus()
 		logger.Error.Printf("Завершили обмен с ModBus")
 		data.DataValue.Connect = false

@@ -150,7 +150,7 @@ func modbusMaster() {
 				break
 			}
 			eh.lock.Lock()
-			for i := 0; i < len(eh.dates); i++ {
+			for i := 0; i < len(eh.reg16); i++ {
 				eh.reg16[i] = reg16[i]
 			}
 			eh.uptime = time.Now()

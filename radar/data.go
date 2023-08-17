@@ -69,7 +69,7 @@ func (h *handler) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 			if !req.IsWrite {
 				h.reg16[int(req.Addr)+i] = 0
 				for l := 0; l < 4; l++ {
-					h.reg16[int(req.Addr)+i] |= uint16(((rand.Intn(3) >> (l * 4)) & 0xf))
+					h.reg16[int(req.Addr)+i] |= uint16((rand.Intn(3) << (l * 4)))
 				}
 			}
 			res = append(res, h.reg16[int(req.Addr)+i])

@@ -106,6 +106,10 @@ func moveArrasIsGood() bool {
 		logger.Info.Printf("Ошибка %s", err.Error())
 		return false
 	}
-	data.Arrays <- nArrays
+	if !data.DataValue.Connect {
+		data.DataValue.SetArrays(nArrays)
+	} else {
+		data.Arrays <- nArrays
+	}
 	return true
 }

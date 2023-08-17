@@ -102,7 +102,9 @@ func ToServer() {
 				logger.Debug.Printf("Ошибка приема %s", s.RemoteAddr().String())
 				data.DataValue.SetConnected(false)
 				socket.Close()
+				connected = false
 				time.Sleep(readTout)
+
 				work = false
 			case <-stop:
 				logger.Info.Print("Останов системы")

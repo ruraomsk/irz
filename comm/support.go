@@ -13,6 +13,7 @@ func makeStatistics(s pudge.Statistic) transport.HeaderDevice {
 	ms.Set0x09Device(&s)
 	mss = append(mss, ms)
 	ms.Set0x0ADevice(&s)
+	// logger.Debug.Printf("message %v", ms)
 	mss = append(mss, ms)
 	hd.UpackMessages(mss)
 	return hd

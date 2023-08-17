@@ -45,11 +45,12 @@ func Statistics() {
 
 }
 func makerStat(head SendStat) {
-	// logger.Debug.Printf("Готовим статистику %d %d", head.Hour, head.Minute)
+	// logger.Debug.Printf("Готовим статистику %2d %2d", head.Hour, head.Minute)
 	if data.DataValue.Controller.Base {
 		statistics.ClearInfo()
 		return
 	}
+
 	for TypeStat := 1; TypeStat <= 2; TypeStat++ {
 		r := pudge.Statistic{Period: head.Period, Type: TypeStat, TLen: head.Interval, Hour: head.Hour, Min: head.Minute, Datas: make([]pudge.DataStat, 0)}
 		for _, v := range statistics.Chanels {
@@ -73,7 +74,7 @@ func makerStat(head SendStat) {
 			}
 		}
 		if len(r.Datas) > 0 {
-			// logger.Debug.Printf("Послали статистику по %d Не забыть написать отправку", TypeStat)
+			// logger.Debug.Printf("Послали статистику %v", r)
 			data.Statistics <- r
 		}
 	}
