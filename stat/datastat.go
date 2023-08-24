@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
-	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/irz/data"
 )
 
@@ -131,7 +130,7 @@ func newStatistics() Chanels {
 	// }
 	init := "*/" + strconv.Itoa(result.Interval)
 	result.Cron.AddFunc(init+" * * * *", func() {
-		logger.Debug.Print("Cron")
+		// logger.Debug.Print("Cron")
 		m := 0
 		if time.Now().Hour() == 0 && time.Now().Minute() == 0 {
 			m = (24 * 60) / statistics.Interval

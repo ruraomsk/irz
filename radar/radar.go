@@ -126,10 +126,14 @@ func modbusMaster() {
 	}
 	client.SetUnitId(uint8(setup.Set.ModbusRadar.ID))
 	for {
+		count := 0
 		for {
 			err = client.Open()
 			if err != nil {
-				logger.Error.Println(err.Error())
+				if count%100 == 0 {
+					logger.Error.Println(err.Error())
+					count++
+				}
 				time.Sleep(5 * time.Second)
 				continue
 			}

@@ -14,9 +14,9 @@ uid = 247
 [modbusradar]
 radar = true  #если истинно нужно открывать прием сигналов радара
 master = true
-debug = true
-# host = "81.95.134.121"
-host = "127.0.0.1"
+# debug = true
+host = "178.176.55.215"
+# host = "127.0.0.1"
 
 port = 15001
 id = 11
