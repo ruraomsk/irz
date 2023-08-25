@@ -1,6 +1,8 @@
 package stat
 
 import (
+	"time"
+
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/irz/data"
 )
@@ -14,6 +16,16 @@ var sendInfo chan Value
 var sendStat chan SendStat
 var statistics Chanels
 
+var GetLast chan interface{}
+var LastSending chan LastSend
+
+type LastSend struct {
+	LastTime time.Time
+	Last     pudge.Statistic
+}
+
+var lastSend = LastSend{LastTime: time.Unix(0, 0), Last: pudge.Statistic{}}
+
 func Statistics() {
 	InStat = make(chan OneTick, 100)
 	ChangeArrays = make(chan interface{})
@@ -21,6 +33,10 @@ func Statistics() {
 	sendStat = make(chan SendStat)
 	getInfo = make(chan int)
 	sendInfo = make(chan Value)
+
+	GetLast = make(chan interface{})
+	LastSending = make(chan LastSend)
+
 	statistics = newStatistics()
 	statistics.Cron.Start()
 	go CtrlInputs()
@@ -40,6 +56,8 @@ func Statistics() {
 			makerStat(head)
 		case d := <-getInfo:
 			sendInfo <- statistics.GetLast(d)
+		case <-GetLast:
+			LastSending <- lastSend
 		}
 	}
 
@@ -75,6 +93,7 @@ func makerStat(head SendStat) {
 		}
 		if len(r.Datas) > 0 {
 			// logger.Debug.Printf("Послали статистику %v", r)
+			lastSend = LastSend{LastTime: time.Now(), Last: r}
 			data.Statistics <- r
 		}
 	}

@@ -109,7 +109,9 @@ func CreateSession(_ rui.Session) rui.SessionContent {
 		{"Суточные карты", CKShow, nil},
 		{"Недельные карты", NKShow, nil},
 		{"Годовая карта", YearShow, nil},
-		{"Индикатор отсчета", VisioShow, nil},
+		// {"Индикатор отсчета", VisioShow, nil},
+		{"Статистика", statisticShow, nil},
+		{"Настройки", setupShow, nil},
 		// {"Состояние КДМ", KDMShow, nil},
 	}
 

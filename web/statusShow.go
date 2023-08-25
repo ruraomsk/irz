@@ -2,11 +2,9 @@ package web
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/anoshenko/rui"
-	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/irz/data"
 	"github.com/ruraomsk/irz/radar"
 	"github.com/ruraomsk/irz/setup"
@@ -118,27 +116,6 @@ const statusText = `
 
 					]
 				},		
-				ListLayout {
-					orientation = horizontal, list-column-gap=16px,padding = 16px,
-					border = _{style=solid,width=4px,color=blue },
-					content = [
-						TextView {
-							text = "<b>Изменение настроек</b>"
-						},
-						Button {
-							id=setBase,content="Установить базовую привязку"
-						},
-						EditView{
-							id=idIP,type=text
-						},
-						NumberPicker {
-							id=idPort,type=editor,min=0,max=32000,value=1090
-						},
-						Button {
-							id=setIP,content="Установить сервер связи"
-						},
-					]
-				},		
 			]
 		}
 `
@@ -224,27 +201,6 @@ func statusShow(session rui.Session) rui.View {
 	}
 	makeViewStatus(view)
 	go updaterStatus(view, session)
-
-	rui.Set(view, "idIP", "text", setup.ExtSet.Server.Host)
-	rui.Set(view, "idPort", "value", setup.ExtSet.Server.Port)
-	rui.Set(view, "setBase", rui.ClickEvent, func(rui.View) {
-		logger.Info.Println("Утановили базовую привязку")
-		data.SetBase <- 1
-	})
-	rui.Set(view, "setIP", rui.ClickEvent, func(rui.View) {
-		setup.ExtSet.Server.Host = rui.GetText(view, "idIP")
-		a := rui.Get(view, "idPort", "value")
-		s, ok := a.(string)
-		if ok {
-			setup.ExtSet.Server.Port, _ = strconv.Atoi(s)
-		}
-		f, ok := a.(float64)
-		if ok {
-			setup.ExtSet.Server.Port = int(f)
-		}
-		logger.Info.Printf("Изменили центр на %s:%d", setup.ExtSet.Server.Host, setup.ExtSet.Server.Port)
-		data.SaveExtSetup <- 1
-	})
 
 	return view
 }
