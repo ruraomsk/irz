@@ -1,5 +1,7 @@
 #!/bin/ash
 while true
 do
-    ./irz
+    echo "start controller" >> start
+    ./irz > /dev/null 2>/dev/null
+    echo "need restart " >> start
 done 

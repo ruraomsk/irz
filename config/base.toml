@@ -29,9 +29,9 @@ baudrate = 19200
 parity = "N"
 [server]
 # host = "asdu.tech"
-host = "10.151.50.126"
+# host = "10.151.50.126"
 # host = "192.168.2.156"
-# host = "192.168.88.2"
+host = "192.168.88.2"
 port = 1093
 [watchdog]
 step = 60 #цикл watchdog в секундах
