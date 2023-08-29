@@ -14,7 +14,7 @@ const setupText = `
 			width = 100%, height = 100%, orientation = vertical, padding = 16px,
 			content = [
 				Button {
-					id=setBase,content="Установить базовую привязку (Будут приняты значения по умолчаию)"
+					id=setBase,content="Установить базовую привязку (Будут приняты значения по умолчанию)"
 				},
 				TextView {
 					text = "<b>Изменение настроек связи с контроллером КДМ</b>",text-align="center",text-size="24px",
