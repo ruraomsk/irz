@@ -65,6 +65,7 @@ const setupText = `
 					orientation = horizontal, list-column-gap=16px,padding = 16px,
 					border = _{style=solid,width=4px,color=blue },
 					content = [
+						DropDownList { id =listRadar, current = 0, items = ["Включен", "Отключен"]},
 						TextView {
 							text = "IP Host",text-size="24px",
 						},
@@ -86,7 +87,6 @@ const setupText = `
 						TextView {
 							text = "Каналов",text-size="24px",
 						},
-
 						NumberPicker {
 							id=idChanelsRadar,type=editor,min=0,max=16,value=16
 						},
@@ -95,8 +95,42 @@ const setupText = `
 				TextView {
 					text = "<b>Изменение настроек связи с TrafficData</b>",text-align="center",text-size="24px",
 				},
+				ListLayout {
+					orientation = horizontal, list-column-gap=16px,padding = 16px,
+					border = _{style=solid,width=4px,color=blue },
+					content = [
+						DropDownList { id =listTrafficData, current = 0, items = ["Включен", "Отключен"]},
+						TextView {
+							text = "Server Host",text-size="24px",
+						},
+						EditView{
+							id=idIPTrafficData,type=text
+						},
+						TextView {
+							text = "Номер порта",text-size="24px",
+						},
+						NumberPicker {
+							id=idPortTrafficData,type=editor,min=0,max=32000,value=0
+						},
+						TextView {
+							text = "Listen port",text-size="24px",
+						},
+						NumberPicker {
+							id=idListenTrafficData,type=editor,min=0,max=32000,value=0
+						},
+						TextView {
+							text = "Каналов",text-size="24px",
+						},
+						NumberPicker {
+							id=idChanelsTrafficData,type=editor,min=0,max=16,value=0
+						},
+					]
+				},
 				Button {
 					id=setUpdate,content="Применить изменения"
+				},
+				TextView {
+					id=idError,text = "",text-align="center",text-size="24px",text-color="red",
 				},
 
 			]
@@ -116,6 +150,49 @@ func setupShow(session rui.Session) rui.View {
 	rui.Set(view, "idPortRadar", "value", setup.ExtSet.ModbusRadar.Port)
 	rui.Set(view, "idUidRadar", "value", setup.ExtSet.ModbusRadar.ID)
 	rui.Set(view, "idChanelsRadar", "value", setup.ExtSet.ModbusRadar.Chanels)
+	c := 0
+	if !setup.ExtSet.ModbusRadar.Radar {
+		c = 1
+	}
+	rui.Set(view, "listRadar", "current", c)
+	rui.Set(view, "listRadar", rui.DropDownEvent, func(_ rui.DropDownList, number int) {
+		switch number {
+		case 0:
+			setup.ExtSet.ModbusRadar.Radar = true
+
+		case 1:
+			setup.ExtSet.ModbusRadar.Radar = false
+		}
+		if setup.ExtSet.TrafficData.Work && setup.ExtSet.ModbusRadar.Radar {
+			rui.Set(view, "idError", "text", "<b>Нельзя одновременно указывать радар и TrafficData</b>")
+		} else {
+			rui.Set(view, "idError", "text", "")
+		}
+	})
+	c = 0
+	if !setup.ExtSet.TrafficData.Work {
+		c = 1
+	}
+	rui.Set(view, "listTrafficData", "current", c)
+	rui.Set(view, "listTrafficData", rui.DropDownEvent, func(_ rui.DropDownList, number int) {
+		switch number {
+		case 0:
+			setup.ExtSet.TrafficData.Work = true
+
+		case 1:
+			setup.ExtSet.TrafficData.Work = false
+		}
+		if setup.ExtSet.TrafficData.Work && setup.ExtSet.ModbusRadar.Radar {
+			rui.Set(view, "idError", "text", "<b>Нельзя одновременно указывать радар и TrafficData</b>")
+		} else {
+			rui.Set(view, "idError", "text", "")
+		}
+	})
+
+	rui.Set(view, "idIPTrafficData", "text", setup.ExtSet.TrafficData.Host)
+	rui.Set(view, "idPortTrafficData", "value", setup.ExtSet.TrafficData.Port)
+	rui.Set(view, "idListenTrafficData", "value", setup.ExtSet.TrafficData.Listen)
+	rui.Set(view, "idChanelsTrafficData", "value", setup.ExtSet.TrafficData.Chanels)
 
 	rui.Set(view, "idDevice", "text", setup.ExtSet.Modbus.Device)
 	rui.Set(view, "idUid", "value", setup.ExtSet.Modbus.UId)
@@ -134,7 +211,16 @@ func setupShow(session rui.Session) rui.View {
 		setup.ExtSet.ModbusRadar.ID = getInteger(rui.Get(view, "idUidRadar", "value"))
 		setup.ExtSet.ModbusRadar.Chanels = getInteger(rui.Get(view, "idChanelsRadar", "value"))
 		logger.Info.Printf("Изменили радар на %s:%d uid %d каналов %d",
-			setup.ExtSet.ModbusRadar.Host, setup.ExtSet.ModbusRadar.Port, setup.ExtSet.ModbusRadar.ID, setup.ExtSet.ModbusRadar.Chanels)
+			setup.ExtSet.ModbusRadar.Host, setup.ExtSet.ModbusRadar.Port, setup.ExtSet.ModbusRadar.ID,
+			setup.ExtSet.ModbusRadar.Chanels)
+
+		setup.ExtSet.TrafficData.Host = rui.GetText(view, "idIPTrafficData")
+		setup.ExtSet.TrafficData.Port = getInteger(rui.Get(view, "idPortTrafficData", "value"))
+		setup.ExtSet.TrafficData.Listen = getInteger(rui.Get(view, "idListenTrafficData", "value"))
+		setup.ExtSet.TrafficData.Chanels = getInteger(rui.Get(view, "idChanelsTrafficData", "value"))
+		logger.Info.Printf("Изменили TrafficData на %s:%d  %d каналов %d",
+			setup.ExtSet.TrafficData.Host, setup.ExtSet.TrafficData.Port, setup.ExtSet.TrafficData.Listen,
+			setup.ExtSet.TrafficData.Chanels)
 
 		data.SaveExtSetup <- 1
 		setup.ExtSet.Modbus.Device = rui.GetText(view, "idDevice")

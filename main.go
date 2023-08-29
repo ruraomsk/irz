@@ -19,6 +19,7 @@ import (
 	"github.com/ruraomsk/irz/radar"
 	"github.com/ruraomsk/irz/setup"
 	"github.com/ruraomsk/irz/stat"
+	"github.com/ruraomsk/irz/traffic"
 	"github.com/ruraomsk/irz/visio"
 	"github.com/ruraomsk/irz/web"
 	"github.com/ruraomsk/irz/worker"
@@ -65,8 +66,8 @@ func main() {
 	go visio.Visio()
 	go stat.Statistics()
 	go radar.Radar()
-
-	rui.AddEmbedResources(&resources)
+	go traffic.Start()
+	go rui.AddEmbedResources(&resources)
 	go web.Web()
 
 	c := make(chan os.Signal, 1)

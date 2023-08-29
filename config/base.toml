@@ -4,6 +4,14 @@ id = 198460 #Номер устройства дома
 # id=230412
 # id=108682			#Номер в Элисте
 immitator = false #если истина то запускать имитатор 
+[server]
+# host = "asdu.tech"
+# host = "10.151.50.126"
+# host = "192.168.2.156"
+host = "192.168.88.2"
+port = 1093
+[pudge]
+dbpath = "db/"
 [modbus]
 # device="rtu:///dev/ttyUSB0"
 # device = "rtu:///dev/ttyEXTRA2_00"
@@ -12,12 +20,11 @@ baudrate = 19200
 parity = "N"
 uid = 247
 [modbusradar]
-radar = true  #если истинно нужно открывать прием сигналов радара
+radar = false #если истинно нужно открывать прием сигналов радара
 master = true
 # debug = true
 host = "178.176.55.215"
 # host = "127.0.0.1"
-
 port = 15001
 id = 11
 chanels = 16
@@ -27,32 +34,10 @@ device = "/dev/ttyUSB0"
 #device="rtu:///dev/ttyEXTRA2_00"
 baudrate = 19200
 parity = "N"
-[server]
-# host = "asdu.tech"
-# host = "10.151.50.126"
-# host = "192.168.2.156"
-host = "192.168.88.2"
-port = 1093
-[watchdog]
-step = 60 #цикл watchdog в секундах
-[pudge]
-dbpath = "db/"
-[hardware]
-step = 100            #цикл опроса датчиков миллисекунд
-connect = "127.0.0.1"
-sport = 5000
-count = 3
-longkk = 3            #Длительность кругом красный
-pinos = 1             #Номер входа ОС
-pinyb = 2             #Номер входа ЖМ
-[netware]
-port = 8000 ## порт откуда ждем настройки
-[rtc]
-[vpu]
-step = 100            #цикл опроса  миллисекунд
-connect = "127.0.0.1"
-sport = 5010
-[counter]
-step = 100            #цикл опроса  миллисекунд
-connect = "127.0.0.1"
-sport = 5011
+[trafficdata]
+work = true
+debug = true       #Запускать иммитатор
+host = "127.0.0.1"
+port = 1666
+listen = 1667
+chanels = 16

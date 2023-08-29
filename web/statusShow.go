@@ -8,6 +8,7 @@ import (
 	"github.com/ruraomsk/irz/data"
 	"github.com/ruraomsk/irz/radar"
 	"github.com/ruraomsk/irz/setup"
+	"github.com/ruraomsk/irz/traffic"
 	"github.com/ruraomsk/irz/visio"
 )
 
@@ -37,6 +38,10 @@ const statusText = `
 				TextView {
 					id=setModbusRadar,semantics="code",
 					text = "modbusRadar"
+				},
+				TextView {
+					id=setTrafficData,semantics="code",
+					text = "trafficData"
 				},
 				TextView {
 					id=setVisio,semantics="code",
@@ -156,6 +161,11 @@ func makeViewStatus(view rui.View) {
 		rui.Set(view, "setModbusRadar", "text", "Оключен прием данных от радаров")
 	} else {
 		rui.Set(view, "setModbusRadar", "text", fmt.Sprintf("От радаров (%s): %s ", radar.GetStatus(), radar.GetValues()))
+	}
+	if !setup.Set.TrafficData.Work {
+		rui.Set(view, "setTrafficData", "text", "Оключен прием данных от TrafficData")
+	} else {
+		rui.Set(view, "setTrafficData", "text", fmt.Sprintf("От TrafficData (%s): %s ", traffic.GetStatus(), traffic.GetValues()))
 	}
 	if !setup.Set.VisioDevice.Visio {
 		rui.Set(view, "setVisio", "text", "Отключена индикация")
