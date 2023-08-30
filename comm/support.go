@@ -26,6 +26,8 @@ func makeStatus() transport.HeaderDevice {
 	mss = append(mss, ms)
 	ms.Set0x11Device(&data.DataValue.Controller)
 	mss = append(mss, ms)
+	ms.Set0x10Device(&data.DataValue.Controller)
+	mss = append(mss, ms)
 	hd.UpackMessages(mss)
 	return hd
 }
@@ -45,8 +47,8 @@ func makeHeaderForConnect() transport.HeaderDevice {
 	var ms transport.SubMessage
 	ms.Set0x1DDevice(&data.DataValue.Controller)
 	mss = append(mss, ms)
-	// ms.Set0x10Device(&data.DataValue.Controller)
-	// mss = append(mss, ms)
+	ms.Set0x10Device(&data.DataValue.Controller)
+	mss = append(mss, ms)
 	ms.Set0x12Device(&data.DataValue.Controller)
 	mss = append(mss, ms)
 	// ms.Set0x1BDevice(&data.DataValue.Controller)

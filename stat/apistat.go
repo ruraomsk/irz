@@ -3,6 +3,7 @@ package stat
 import (
 	"time"
 
+	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/irz/data"
 )
@@ -44,6 +45,7 @@ func Statistics() {
 	for {
 		select {
 		case <-ChangeArrays:
+			logger.Debug.Println("Смена массивов привязки")
 			statistics.Cron.Stop()
 			statistics = newStatistics()
 			statistics.Cron.Start()

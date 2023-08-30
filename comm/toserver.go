@@ -11,6 +11,7 @@ import (
 	"github.com/ruraomsk/ag-server/transport"
 	"github.com/ruraomsk/irz/data"
 	"github.com/ruraomsk/irz/setup"
+	"github.com/ruraomsk/irz/stat"
 )
 
 var socket net.Conn
@@ -134,6 +135,7 @@ func makeReplay(in transport.HeaderServer) (transport.HeaderDevice, bool) {
 			data.DataValue.Controller.TechMode = lastTechmode
 			if moveArrasIsGood() {
 				logger.Info.Print("Привязки хорошие")
+				stat.ChangeArrays <- 1
 				data.DataValue.SetBase(false)
 			} else {
 				logger.Info.Print("Привязки плохие")
