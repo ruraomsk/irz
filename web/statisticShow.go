@@ -52,9 +52,9 @@ func makeViewStatistic(view rui.View) {
 
 	var result string
 	if last.LastTime == time.Unix(0, 0) {
-		result = "Еще нет отправленных данных статистики"
+		result = "Еще нет собранной статистики"
 	} else {
-		result = fmt.Sprintf("Отправлено %s ", toString(last.LastTime))
+		result = fmt.Sprintf("Последний расчет %s ", toString(last.LastTime))
 		result += fmt.Sprintf(" %02d:%02d ", last.Last.Hour, last.Last.Min)
 		if last.Last.Type == 1 {
 			result += " интенсивность "

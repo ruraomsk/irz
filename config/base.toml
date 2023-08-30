@@ -20,9 +20,10 @@ baudrate = 19200
 parity = "N"
 uid = 247
 [modbusradar]
-radar = false #если истинно нужно открывать прием сигналов радара
+idshow = 9
+radar = false           #если истинно нужно открывать прием сигналов радара
 master = true
-# debug = true
+debug = false
 host = "178.176.55.215"
 # host = "127.0.0.1"
 port = 15001
@@ -35,6 +36,7 @@ device = "/dev/ttyUSB0"
 baudrate = 19200
 parity = "N"
 [trafficdata]
+idshow = 8
 work = true
 debug = true       #Запускать иммитатор
 host = "127.0.0.1"

@@ -31,7 +31,7 @@ func GetProductInformation(message string) string {
 		c := Camera{Id: fmt.Sprintf("%d", i),
 			Name:         fmt.Sprintf("Camera %d", i),
 			Url:          fmt.Sprintf("rtsp://192.168.100.%d:%d/%d", rand.Intn(100), rand.Intn(9999), rand.Intn(200)),
-			StreamingUrl: ""}
+			StreamingUrl: fmt.Sprintf("rtsp://192.168.100.%d:%d/edge%d.stream", rand.Intn(100), rand.Intn(9999), rand.Intn(200))}
 		pi.Body.Camera = append(pi.Body.Camera, c)
 	}
 	s, err := xml.Marshal(pi)
