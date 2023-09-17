@@ -5,10 +5,10 @@ id = 101
 # id=108682			#Номер в Элисте
 immitator = false #если истина то запускать имитатор 
 [server]
-host = "asdu.tech"
+# host = "asdu.tech"
 # host = "10.151.50.126"
 # host = "192.168.2.156"
-# host = "192.168.88.2"
+host = "192.168.88.2"
 port = 1093
 [pudge]
 dbpath = "db/"
@@ -20,7 +20,7 @@ baudrate = 19200
 parity = "N"
 uid = 247
 [modbusradar]
-radar = false           #если истинно нужно открывать прием сигналов радара
+radar = true            #если истинно нужно открывать прием сигналов радара
 master = true
 debug = false
 host = "178.176.55.215"
@@ -35,7 +35,7 @@ device = "/dev/ttyUSB0"
 baudrate = 19200
 parity = "N"
 [trafficdata]
-work = true
+work = false
 debug = true       #Запускать иммитатор
 host = "127.0.0.1"
 port = 1666

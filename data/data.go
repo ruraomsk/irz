@@ -174,6 +174,13 @@ func (c *Common) SetArrays(arrays binding.Arrays) {
 	DataValue.change = true
 	mutex.Unlock()
 }
+func (c *Common) SetErrorDK(code int) {
+	mutex.Lock()
+	DataValue.Controller.DK.EDK = code
+	DataValue.change = true
+	mutex.Unlock()
+}
+
 func (c *Common) SetDK(dk pudge.DK) {
 	mutex.Lock()
 	DataValue.Controller.DK = dk
@@ -225,6 +232,7 @@ func LoadAll() {
 	DataValue.Controller.GPS.Ok = true
 	DataValue.Controller.Status.Ethernet = true
 	DataValue.Connect = false
+	DataValue.SetErrorDK(0)
 	initChans()
 
 	go run()

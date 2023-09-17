@@ -38,11 +38,10 @@ var isDUPhase = false
 func Worker() {
 	toPlan = make(chan data.StatusDevice, 100)
 	endPlan = make(chan interface{})
+	dk.EDK = 0
 	data.DataValue.SetDK(dk)
 	for !data.DataValue.Connect {
-		dk = data.DataValue.GetDK()
-		dk.EDK = 11
-		data.DataValue.SetDK(dk)
+		data.DataValue.SetErrorDK(11)
 		time.Sleep(1 * time.Second)
 	}
 
@@ -58,9 +57,9 @@ func Worker() {
 		case cmd := <-data.Commands:
 			if !data.DataValue.Connect {
 				dk = data.DataValue.GetDK()
-				dk.EDK = 11
 				dk.DDK = 8
 				data.DataValue.SetDK(dk)
+				data.DataValue.SetErrorDK(11)
 				continue
 			}
 			// logger.Info.Printf("Команда %v", cmd)

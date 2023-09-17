@@ -96,8 +96,11 @@ func Kdm() {
 			continue
 		}
 		count = 0
+		data.DataValue.SetErrorDK(0)
+
 		workModbus()
 		logger.Error.Printf("Завершили обмен с ModBus")
+		data.DataValue.SetErrorDK(11)
 		data.DataValue.Connect = false
 		State.Connect = false
 		data.FromDevice <- State
