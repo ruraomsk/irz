@@ -28,6 +28,43 @@ const PkText = `
 					]
 }
 `
+const PkHeader = `
+	GridLayout{
+		id=idHead%d,
+		context = [
+				TextView{ row=0, text="Тип "},
+				ListView {
+					row=0,column=1,						
+					id=idTc%d, width = 100%, height = 100%, orientation = vertical,
+					items = ["Координированный", "Локальный","Локальное управление","Желтое мигание","Отключить светофор"],
+				},
+				TextView{ id=idLong%d, row=1, text="Длительность "},
+				TextView{ id=idShift%d, row=2, text="Смещение "},
+		]
+	}
+`
+
+// 1 - МГР
+// 2 - 1ТВП
+// 3 - 2ТВП
+// 4 - 1,2ТВП
+// 5 - Зам 1 ТВП
+// 6 - Зам 2 ТВП
+// 7 - Зам
+// 8 - МДК
+// 9 - ВДК
+
+const PkLine = `
+ListView {
+	id=idLine%d, width = 100%, height = 100%, orientation = vertical,
+	items = ["Простая", "МГР","1ТВП","2ТВП","1,2ТВП","Зам 1 ТВП","Зам 1 ТВП","Зам"],
+},
+`
+const PkBottom = `
+Button{
+	id=idBottom%d,content="Принять изменения"
+}
+`
 
 func PKShow(session rui.Session) rui.View {
 	mutex.Lock()
@@ -73,7 +110,7 @@ func PKShow(session rui.Session) rui.View {
 		count := 1
 		content = append(content, []any{tp, rui.HorizontalTableJoin{}})
 		if header > 0 {
-			content = append(content, []any{"Начало", "Конец", "Тип", "Фаза"})
+			content = append(content, []any{"Тип", "Фаза", "Длительность"})
 			count++
 		}
 
@@ -110,7 +147,7 @@ func PKShow(session rui.Session) rui.View {
 			case 7:
 				tf = "ЗАМ ТВП 1,2 "
 			}
-			content = append(content, []any{v.Start, v.Stop, tf, v.Number})
+			content = append(content, []any{tf, v.Number, v.Stop - v.Start})
 			count++
 		}
 
