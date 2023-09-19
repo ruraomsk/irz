@@ -11,59 +11,28 @@ import (
 )
 
 const PkText = `
-				TabsLayout { id = tabsPK, width = 100%, height = 100%, tabs = top, tab-close-button = false,
-					content = [
-						TableView {cell-horizontal-align = right,  title = "ПК1", id="pk1"},
-						TableView {cell-horizontal-align = right,  title = "ПК2", id="pk2"},
-						TableView {cell-horizontal-align = right,  title = "ПК3", id="pk3"},
-						TableView {cell-horizontal-align = right,  title = "ПК4", id="pk4"},
-						TableView {cell-horizontal-align = right,  title = "ПК5", id="pk5"},
-						TableView {cell-horizontal-align = right,  title = "ПК6", id="pk6"},
-						TableView {cell-horizontal-align = right,  title = "ПК7", id="pk7"},
-						TableView {cell-horizontal-align = right,  title = "ПК8", id="pk8"},
-						TableView {cell-horizontal-align = right,  title = "ПК9", id="pk9"},
-						TableView {cell-horizontal-align = right,  title = "ПК10", id="pk10"},
-						TableView {cell-horizontal-align = right,  title = "ПК11", id="pk11"},
-						TableView {cell-horizontal-align = right,  title = "ПК12", id="pk12"},
-					]
-}
-`
-const PkHeader = `
-	GridLayout{
-		id=idHead%d,
-		context = [
-				TextView{ row=0, text="Тип "},
-				ListView {
-					row=0,column=1,						
-					id=idTc%d, width = 100%, height = 100%, orientation = vertical,
-					items = ["Координированный", "Локальный","Локальное управление","Желтое мигание","Отключить светофор"],
-				},
-				TextView{ id=idLong%d, row=1, text="Длительность "},
-				TextView{ id=idShift%d, row=2, text="Смещение "},
-		]
+	ListLayout {
+		width = 100%, height = 100%, orientation = vertical, padding = 16px,
+		content = [
+			Button{ id = idEdit, content="Изменить выбранный план координации" },
+			TabsLayout { id = tabsPK, width = 100%, height = 100%, tabs = top, tab-close-button = false,
+				content = [
+					TableView {cell-horizontal-align = right,  title = "ПК1", id="pk1"},
+					TableView {cell-horizontal-align = right,  title = "ПК2", id="pk2"},
+					TableView {cell-horizontal-align = right,  title = "ПК3", id="pk3"},
+					TableView {cell-horizontal-align = right,  title = "ПК4", id="pk4"},
+					TableView {cell-horizontal-align = right,  title = "ПК5", id="pk5"},
+					TableView {cell-horizontal-align = right,  title = "ПК6", id="pk6"},
+					TableView {cell-horizontal-align = right,  title = "ПК7", id="pk7"},
+					TableView {cell-horizontal-align = right,  title = "ПК8", id="pk8"},
+					TableView {cell-horizontal-align = right,  title = "ПК9", id="pk9"},
+					TableView {cell-horizontal-align = right,  title = "ПК10", id="pk10"},
+					TableView {cell-horizontal-align = right,  title = "ПК11", id="pk11"},
+					TableView {cell-horizontal-align = right,  title = "ПК12", id="pk12"},
+				]
+			}
+		]		
 	}
-`
-
-// 1 - МГР
-// 2 - 1ТВП
-// 3 - 2ТВП
-// 4 - 1,2ТВП
-// 5 - Зам 1 ТВП
-// 6 - Зам 2 ТВП
-// 7 - Зам
-// 8 - МДК
-// 9 - ВДК
-
-const PkLine = `
-ListView {
-	id=idLine%d, width = 100%, height = 100%, orientation = vertical,
-	items = ["Простая", "МГР","1ТВП","2ТВП","1,2ТВП","Зам 1 ТВП","Зам 1 ТВП","Зам"],
-},
-`
-const PkBottom = `
-Button{
-	id=idBottom%d,content="Принять изменения"
-}
 `
 
 func PKShow(session rui.Session) rui.View {
@@ -74,6 +43,9 @@ func PKShow(session rui.Session) rui.View {
 	if view == nil {
 		return nil
 	}
+	rui.Set(view, "idEdit", rui.ClickEvent, func(rui.View) {
+		rui.ShowMessage("Выбрано ", fmt.Sprintf("%d", rui.GetCurrent(view, "tabsPK")), session)
+	})
 	for pl := 1; pl < 13; pl++ {
 		var pk = binding.SetPk{Pk: 0}
 		for _, v := range data.DataValue.Arrays.SetDK.DK {
@@ -87,7 +59,7 @@ func PKShow(session rui.Session) rui.View {
 		}
 		pk = worker.RepackPlan(pk)
 		tp := ""
-		header := 1
+		// header := 1
 		if pk.Tc > 2 {
 			tp = "Координированный"
 			if pk.TypePU == 1 {
@@ -97,7 +69,7 @@ func PKShow(session rui.Session) rui.View {
 			}
 			tp += fmt.Sprintf(" Время цикла %d", pk.Tc)
 		} else {
-			header = 0
+			// header = 0
 			if pk.Tc == 0 {
 				tp = "Локальное управление"
 			} else if pk.Tc == 1 {
@@ -109,15 +81,15 @@ func PKShow(session rui.Session) rui.View {
 		var content [][]any
 		count := 1
 		content = append(content, []any{tp, rui.HorizontalTableJoin{}})
-		if header > 0 {
-			content = append(content, []any{"Тип", "Фаза", "Длительность"})
-			count++
-		}
+		// if header > 0 {
+		content = append(content, []any{"Тип", "Фаза", "Длительность"})
+		count++
+		// }
 
 		for _, v := range pk.Stages {
-			if v.Start == 0 && v.Stop == 0 {
-				continue
-			}
+			// if v.Start == 0 && v.Stop == 0 {
+			// 	continue
+			// }
 			// 1 - МГР
 			// 2 - 1ТВП
 			// 3 - 2ТВП
@@ -147,10 +119,14 @@ func PKShow(session rui.Session) rui.View {
 			case 7:
 				tf = "ЗАМ ТВП 1,2 "
 			}
-			content = append(content, []any{tf, v.Number, v.Stop - v.Start})
+			if v.Stop-v.Start > 0 {
+				content = append(content, []any{tf, v.Number, v.Stop - v.Start})
+			} else {
+				content = append(content, []any{"Пустая"})
+			}
 			count++
 		}
-
+		content = append(content)
 		rui.SetParams(view, fmt.Sprintf("pk%d", pl), rui.Params{
 			rui.Content:     content,
 			rui.HeadHeight:  count,

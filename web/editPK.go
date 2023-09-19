@@ -1,0 +1,164 @@
+package web
+
+// import (
+// 	"fmt"
+
+// 	"github.com/anoshenko/rui"
+// 	"github.com/ruraomsk/ag-server/binding"
+// 	"github.com/ruraomsk/ag-server/logger"
+// 	"github.com/ruraomsk/irz/data"
+// 	"github.com/ruraomsk/irz/worker"
+// )
+
+// const PkText = `
+// 				TabsLayout { id = tabsPK, width = 100%, height = 100%, tabs = top, tab-close-button = false,
+// 					content = [
+// 						TableView {cell-horizontal-align = right,  title = "ПК1", id="pk1"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК2", id="pk2"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК3", id="pk3"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК4", id="pk4"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК5", id="pk5"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК6", id="pk6"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК7", id="pk7"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК8", id="pk8"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК9", id="pk9"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК10", id="pk10"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК11", id="pk11"},
+// 						TableView {cell-horizontal-align = right,  title = "ПК12", id="pk12"},
+// 					]
+// }
+// `
+// const PkHeader = `
+// 	GridLayout{
+// 		id=idHead%d,
+// 		context = [
+// 				TextView{ row=0, text="Тип "},
+// 				DropDownView {
+// 					row=0,column=1,
+// 					id=idTc%d, width = 100%, height = 100%, orientation = vertical,current=1,
+// 					items = ["Координированный", "Локальный","Локальное управление","Желтое мигание","Отключить светофор"],
+// 				},
+// 				TextView{ id=idLong%d, row=1, text="Длительность "},
+// 				TextView{ id=idShift%d, row=2, text="Сдвиг "},
+// 				NumberPicker {
+// 					id=idShift%d,type=editor,min=0,max=360,value=0
+// 				},
+
+// 		]
+// 	}
+// `
+
+// const PkLine = `
+// ListView {
+// 	id=idLine%d, width = 100%, height = 100%, orientation = vertical,
+// 	items = ["Простая", "МГР","1ТВП","2ТВП","1,2ТВП","Зам 1 ТВП","Зам 1 ТВП","Зам"],
+// },
+// `
+// const PkBottom = `
+// Button{
+// 	id=idBottom%d,content="Принять изменения"
+// }
+// `
+
+// var mapPKs map[int]binding.SetPk
+
+// func PKShow(session rui.Session) rui.View {
+// 	mutex.Lock()
+// 	defer mutex.Unlock()
+// 	mapPKs = make(map[int]binding.SetPk)
+// 	view := rui.CreateViewFromText(session, PkText)
+// 	if view == nil {
+// 		return nil
+// 	}
+// 	for pl := 1; pl < 13; pl++ {
+// 		var pk = binding.SetPk{Pk: 0}
+// 		for _, v := range data.DataValue.Arrays.SetDK.DK {
+// 			if v.Pk == pl {
+// 				pk = v
+// 			}
+// 		}
+// 		if pk.Pk == 0 {
+// 			logger.Error.Printf("Нет плана координации %d", pl)
+// 			continue
+// 		}
+// 		pk = worker.RepackPlan(pk)
+// 		mapPKs[pl] = pk
+// 		header := fmt.Sprintf(PkHeader, pl, pl, pl, pl, pl)
+
+// 		tp := 0
+
+// 		if pk.Tc > 2 {
+// 			if pk.TypePU == 1 {
+// 				tp = 1
+// 			} else {
+
+// 				tp += fmt.Sprintf(" Сдвиг %d", pk.Shift)
+// 			}
+// 			tp += fmt.Sprintf(" Время цикла %d", pk.Tc)
+// 		} else {
+// 			header = 0
+// 			if pk.Tc == 0 {
+// 				tp = "Локальное управление"
+// 			} else if pk.Tc == 1 {
+// 				tp = "Желтое мигание"
+// 			} else if pk.Tc == 1 {
+// 				tp = "Отключить светофор"
+// 			}
+// 		}
+
+// 		rui.Set(view, "idIP", fmt.Sprintf("idTc%d", pl), tp)
+
+// 		var content [][]any
+// 		count := 1
+// 		content = append(content, []any{tp, rui.HorizontalTableJoin{}})
+// 		if header > 0 {
+// 			content = append(content, []any{"Тип", "Фаза", "Длительность"})
+// 			count++
+// 		}
+
+// 		for _, v := range pk.Stages {
+// 			if v.Start == 0 && v.Stop == 0 {
+// 				continue
+// 			}
+// 			// 1 - МГР
+// 			// 2 - 1ТВП
+// 			// 3 - 2ТВП
+// 			// 4 - 1,2ТВП
+// 			// 5 - Зам 1 ТВП
+// 			// 6 - Зам 2 ТВП
+// 			// 7 - Зам
+// 			// 8 - МДК
+// 			// 9 - ВДК
+
+// 			tf := ""
+// 			switch v.Tf {
+// 			case 0:
+// 				tf = "Простая"
+// 			case 1:
+// 				tf = "МГР"
+// 			case 2:
+// 				tf = "ТВП 1"
+// 			case 3:
+// 				tf = "ТВП 2"
+// 			case 4:
+// 				tf = "ТВП 1,2 "
+// 			case 5:
+// 				tf = "ЗАМ ТВП 1 "
+// 			case 6:
+// 				tf = "ЗАМ ТВП 2 "
+// 			case 7:
+// 				tf = "ЗАМ ТВП 1,2 "
+// 			}
+// 			content = append(content, []any{tf, v.Number, v.Stop - v.Start})
+// 			count++
+// 		}
+
+// 		rui.SetParams(view, fmt.Sprintf("pk%d", pl), rui.Params{
+// 			rui.Content:     content,
+// 			rui.HeadHeight:  count,
+// 			rui.CellPadding: "4px",
+// 		})
+
+// 	}
+// 	return view
+// }
