@@ -44,7 +44,7 @@ func PKShow(session rui.Session) rui.View {
 		return nil
 	}
 	rui.Set(view, "idEdit", rui.ClickEvent, func(rui.View) {
-		rui.ShowMessage("Выбрано ", fmt.Sprintf("%d", rui.GetCurrent(view, "tabsPK")), session)
+		editPK(session, rui.GetCurrent(view, "tabsPK")+1)
 	})
 	for pl := 1; pl < 13; pl++ {
 		var pk = binding.SetPk{Pk: 0}

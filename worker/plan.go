@@ -290,7 +290,7 @@ func buildControl(pk binding.SetPk) control {
 }
 func RepackPlan(pk binding.SetPk) binding.SetPk {
 	logger.Info.Printf("in %s", toSting(pk))
-	if pk.TypePU == 1 {
+	if pk.TypePU == 1 || pk.TypePU == 10 {
 		// logger.Info.Printf("План локальный ничего не меняем")
 		return pk
 	}
