@@ -67,6 +67,9 @@ func (c *Common) setEmpty() {
 	c.Controller.Arrays = make([]pudge.ArrayPriv, 0)
 	c.Controller.LogLines = make([]pudge.LogLine, 0)
 	c.Arrays = *binding.NewArrays()
+	//Создать одну карту суточную и одну недельную
+	c.Arrays.DaySets.DaySets[0].Lines[0].PKNom = 1
+	c.Arrays.WeekSets.WeekSets[0].Days = []int{1, 1, 1, 1, 1, 1, 1}
 }
 func (c *Common) Save() error {
 	mutex.Lock()

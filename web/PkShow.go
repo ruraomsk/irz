@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/anoshenko/rui"
 	"github.com/ruraomsk/ag-server/binding"
@@ -35,17 +36,10 @@ const PkText = `
 	}
 `
 
-func PKShow(session rui.Session) rui.View {
+func makePKShow(view rui.View) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	view := rui.CreateViewFromText(session, PkText)
-	if view == nil {
-		return nil
-	}
-	rui.Set(view, "idEdit", rui.ClickEvent, func(rui.View) {
-		editPK(session, rui.GetCurrent(view, "tabsPK")+1)
-	})
 	for pl := 1; pl < 13; pl++ {
 		var pk = binding.SetPk{Pk: 0}
 		for _, v := range data.DataValue.Arrays.SetDK.DK {
@@ -74,7 +68,7 @@ func PKShow(session rui.Session) rui.View {
 				tp = "Локальное управление"
 			} else if pk.Tc == 1 {
 				tp = "Желтое мигание"
-			} else if pk.Tc == 1 {
+			} else if pk.Tc == 2 {
 				tp = "Отключить светофор"
 			}
 		}
@@ -82,7 +76,7 @@ func PKShow(session rui.Session) rui.View {
 		count := 1
 		content = append(content, []any{tp, rui.HorizontalTableJoin{}})
 		// if header > 0 {
-		content = append(content, []any{"Тип", "Фаза", "Длительность"})
+		content = append(content, []any{"Тип", "Фаза", "Начало", "Конец"})
 		count++
 		// }
 
@@ -119,11 +113,7 @@ func PKShow(session rui.Session) rui.View {
 			case 7:
 				tf = "ЗАМ ТВП 1,2 "
 			}
-			if v.Stop-v.Start > 0 {
-				content = append(content, []any{tf, v.Number, v.Stop - v.Start})
-			} else {
-				content = append(content, []any{"Пустая"})
-			}
+			content = append(content, []any{tf, v.Number, v.Start, v.Stop})
 			count++
 		}
 		content = append(content)
@@ -134,5 +124,37 @@ func PKShow(session rui.Session) rui.View {
 		})
 
 	}
+
+}
+func updaterPkShow(view rui.View, session rui.Session) {
+	ticker := time.NewTicker(time.Second)
+	for {
+		<-ticker.C
+		if view == nil {
+			return
+		}
+		w, ok := SessionStatus[session.ID()]
+		if !ok {
+			continue
+		}
+
+		if !w {
+			continue
+		}
+		makePKShow(view)
+	}
+}
+
+func PKShow(session rui.Session) rui.View {
+
+	view := rui.CreateViewFromText(session, PkText)
+	if view == nil {
+		return nil
+	}
+	makePKShow(view)
+	rui.Set(view, "idEdit", rui.ClickEvent, func(rui.View) {
+		editPK(session, rui.GetCurrent(view, "tabsPK")+1)
+	})
+	go updaterPkShow(view, session)
 	return view
 }
