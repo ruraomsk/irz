@@ -171,6 +171,9 @@ const CkEdit = `
 var edCkPopup rui.Popup
 
 func editCK(session rui.Session, cart int) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	edit := rui.CreateViewFromText(session, CkEdit)
 
 	var ck = binding.OneDay{Number: 0}
@@ -202,6 +205,7 @@ func editCK(session rui.Session, cart int) {
 			}
 		}
 		rui.ShowMessage("Сохранение", fmt.Sprintf("Суточная карта %d сохранена", cart), session)
+		updatedCk = true
 		edCkPopup.Dismiss()
 	})
 	rui.Set(edit, "idNo", rui.ClickEvent, func(view rui.View) {

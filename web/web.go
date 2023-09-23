@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/anoshenko/rui"
+	"github.com/ruraomsk/ag-server/logger"
 )
 
 var mutex sync.Mutex
@@ -178,6 +179,7 @@ func Web() {
 	SessionStatus = make(map[int]bool)
 	rui.ProtocolInDebugLog = false
 	addr := rui.GetLocalIP() + ":8000"
+	logger.Info.Printf("Start web to %s ", addr)
 	// addr := "localhost:8000"
 	if rui.GetLocalIP() == "192.168.2.100" {
 		rui.OpenBrowser("http://" + addr)

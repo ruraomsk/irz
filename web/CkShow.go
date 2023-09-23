@@ -35,6 +35,8 @@ ListLayout {
 }
 `
 
+var updatedCk = false
+
 func makeCkShow(view rui.View) {
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -81,7 +83,10 @@ func updaterCkShow(view rui.View, session rui.Session) {
 		if !w {
 			continue
 		}
-		makeCkShow(view)
+		if updatedCk {
+			makeCkShow(view)
+			updatedCk = false
+		}
 	}
 }
 

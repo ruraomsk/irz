@@ -62,6 +62,10 @@ const NkEdit = `
 var edNkPopup rui.Popup
 
 func editNK(session rui.Session, cart int) {
+
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	edit := rui.CreateViewFromText(session, NkEdit)
 
 	var nk = binding.OneWeek{Number: 0}
@@ -84,6 +88,7 @@ func editNK(session rui.Session, cart int) {
 
 		}
 		rui.ShowMessage("Сохранение", fmt.Sprintf("Недельная карта %d сохранена", cart), session)
+		updatedNk = true
 		edNkPopup.Dismiss()
 	})
 	rui.Set(edit, "idNo", rui.ClickEvent, func(view rui.View) {

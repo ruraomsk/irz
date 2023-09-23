@@ -36,6 +36,8 @@ const PkText = `
 	}
 `
 
+var updatedPk = false
+
 func makePKShow(view rui.View) {
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -116,7 +118,7 @@ func makePKShow(view rui.View) {
 			content = append(content, []any{tf, v.Number, v.Start, v.Stop})
 			count++
 		}
-		content = append(content)
+		// content = append(content)
 		rui.SetParams(view, fmt.Sprintf("pk%d", pl), rui.Params{
 			rui.Content:     content,
 			rui.HeadHeight:  count,
@@ -141,7 +143,10 @@ func updaterPkShow(view rui.View, session rui.Session) {
 		if !w {
 			continue
 		}
-		makePKShow(view)
+		if updatedPk {
+			makePKShow(view)
+			updatedPk = false
+		}
 	}
 }
 

@@ -261,6 +261,8 @@ const PkEdit = `
 var edPkPopup rui.Popup
 
 func editPK(session rui.Session, plan int) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	edit := rui.CreateViewFromText(session, PkEdit)
 	var pk = binding.SetPk{Pk: 0}
 	for _, v := range data.DataValue.Arrays.SetDK.DK {
@@ -356,6 +358,7 @@ func editPK(session rui.Session, plan int) {
 			break
 		}
 		rui.ShowMessage("Сохранение", fmt.Sprintf("План координации %d сохранен", plan), session)
+		updatedPk = true
 		edPkPopup.Dismiss()
 	})
 	rui.Set(edit, "idNo", rui.ClickEvent, func(view rui.View) {
