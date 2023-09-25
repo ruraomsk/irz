@@ -117,6 +117,7 @@ func goPlan(pl int) {
 		}
 		skip := false
 		var dv binding.Stage
+		mgrtime := 0
 		for i, v := range pk.Stages {
 			if v.Start == 0 && v.Stop == 0 {
 				continue
@@ -125,22 +126,30 @@ func goPlan(pl int) {
 				skip = false
 				continue
 			}
-			if v.Tf == 0 {
-				lastTimePhase = v.Stop - v.Start
+			if isMGR(v.Tf) {
 				if waitTime(v.Stop-v.Start, v.Number) != nil {
+					return
+				}
+				controlPhase(v.Number)
+				data.QAInfo <- data.QInfo{TypeDev: 3, Interval: 5}
+				mgr := <-data.AInfo
+				if mgr {
+					mgrtime = 5
+					if waitTime(5, v.Number) != nil {
+						return
+					}
+					controlPhase(v.Number)
+
+				}
+
+			}
+			if v.Tf == 0 {
+				lastTimePhase = v.Stop - v.Start - mgrtime
+				if waitTime(v.Stop-v.Start-mgrtime, v.Number) != nil {
 
 					return
 				}
-				if v.Number != state.PhaseTU {
-					logger.Error.Printf("Неподчинение фазы %d приходит %d", v.Number, state.PhaseTU)
-					dk = data.DataValue.GetDK()
-					dk.EDK = 8
-					data.DataValue.SetDK(dk)
-				} else {
-					dk = data.DataValue.GetDK()
-					dk.EDK = 0
-					data.DataValue.SetDK(dk)
-				}
+				controlPhase(v.Number)
 			}
 			if isTVP(v.Tf) {
 				zam := false
@@ -154,114 +163,59 @@ func goPlan(pl int) {
 				tvp1 := <-data.AInfo
 				data.QAInfo <- data.QInfo{TypeDev: 2, Interval: lastTimePhase}
 				tvp2 := <-data.AInfo
-				// logger.Debug.Printf("tvp1 %v tvp2 %v", tvp1, tvp2)
 				if v.Tf == 2 {
 					if tvp1 {
-						if waitTime(v.Stop-v.Start, v.Number) != nil {
+						if waitTime(v.Stop-v.Start-mgrtime, v.Number) != nil {
 							return
 						}
-						if v.Number != state.PhaseTU {
-							logger.Error.Printf("Неподчинение фазы %d приходит %d", v.Number, state.PhaseTU)
-							dk = data.DataValue.GetDK()
-							dk.EDK = 8
-							data.DataValue.SetDK(dk)
-						} else {
-							dk = data.DataValue.GetDK()
-							dk.EDK = 0
-							data.DataValue.SetDK(dk)
-						}
+						controlPhase(v.Number)
 						if zam {
 							skip = true
 						}
 					} else {
 						if zam {
-							if waitTime(dv.Stop-dv.Start, dv.Number) != nil {
+							if waitTime(dv.Stop-dv.Start-mgrtime, dv.Number) != nil {
 								return
 							}
-							if dv.Number != state.PhaseTU {
-								logger.Error.Printf("Неподчинение фазы %d приходит %d", dv.Number, state.PhaseTU)
-								dk = data.DataValue.GetDK()
-								dk.EDK = 8
-								data.DataValue.SetDK(dk)
-							} else {
-								dk = data.DataValue.GetDK()
-								dk.EDK = 0
-								data.DataValue.SetDK(dk)
-							}
+							controlPhase(v.Number)
 							skip = true
 						}
 					}
 				}
 				if v.Tf == 3 {
 					if tvp2 {
-						if waitTime(v.Stop-v.Start, v.Number) != nil {
+						if waitTime(v.Stop-v.Start-mgrtime, v.Number) != nil {
 							return
 						}
-						if v.Number != state.PhaseTU {
-							logger.Error.Printf("Неподчинение фазы %d приходит %d", v.Number, state.PhaseTU)
-							dk = data.DataValue.GetDK()
-							dk.EDK = 8
-							data.DataValue.SetDK(dk)
-						} else {
-							dk = data.DataValue.GetDK()
-							dk.EDK = 0
-							data.DataValue.SetDK(dk)
-						}
+						controlPhase(v.Number)
 						if zam {
 							skip = true
 						}
 					} else {
 						if zam {
-							if waitTime(dv.Stop-dv.Start, dv.Number) != nil {
+							if waitTime(dv.Stop-dv.Start-mgrtime, dv.Number) != nil {
 								return
 							}
-							if dv.Number != state.PhaseTU {
-								logger.Error.Printf("Неподчинение фазы %d приходит %d", dv.Number, state.PhaseTU)
-								dk = data.DataValue.GetDK()
-								dk.EDK = 8
-								data.DataValue.SetDK(dk)
-							} else {
-								dk = data.DataValue.GetDK()
-								dk.EDK = 0
-								data.DataValue.SetDK(dk)
-							}
+							controlPhase(v.Number)
 							skip = true
 						}
 					}
 				}
 				if v.Tf == 4 {
 					if tvp2 && tvp1 {
-						if waitTime(v.Stop-v.Start, v.Number) != nil {
+						if waitTime(v.Stop-v.Start-mgrtime, v.Number) != nil {
 							return
 						}
-						if v.Number != state.PhaseTU {
-							logger.Error.Printf("Неподчинение фазы %d приходит %d", v.Number, state.PhaseTU)
-							dk = data.DataValue.GetDK()
-							dk.EDK = 8
-							data.DataValue.SetDK(dk)
-						} else {
-							dk = data.DataValue.GetDK()
-							dk.EDK = 0
-							data.DataValue.SetDK(dk)
-						}
+						controlPhase(v.Number)
 						if zam {
 							skip = true
 						}
 					} else {
 						if zam {
-							if waitTime(dv.Stop-dv.Start, dv.Number) != nil {
+							if waitTime(dv.Stop-dv.Start-mgrtime, dv.Number) != nil {
 								return
 							}
-							if dv.Number != state.PhaseTU {
-								logger.Error.Printf("Неподчинение фазы %d приходит %d", dv.Number, state.PhaseTU)
-								dk = data.DataValue.GetDK()
-								dk.EDK = 8
-								data.DataValue.SetDK(dk)
-							} else {
-								dk = data.DataValue.GetDK()
-								dk.EDK = 0
-								data.DataValue.SetDK(dk)
-							}
+							controlPhase(v.Number)
 							skip = true
 						}
 					}
@@ -380,10 +334,7 @@ func isTVP(tf int) bool {
 	// 8 - МДК
 	// 9 - ВДК
 
-	if tf == 2 || tf == 3 || tf == 4 {
-		return true
-	}
-	return false
+	return tf == 2 || tf == 3 || tf == 4
 }
 func isZAM(tf int) bool {
 	// Tf     int `json:"tf"`    //Тип фазы 0 -простая
@@ -397,8 +348,21 @@ func isZAM(tf int) bool {
 	// 8 - МДК
 	// 9 - ВДК
 
-	if tf == 5 || tf == 6 || tf == 7 {
-		return true
+	return tf == 5 || tf == 6 || tf == 7
+}
+func isMGR(tf int) bool {
+	return tf == 1
+}
+func controlPhase(phase int) {
+	if phase != state.PhaseTU {
+		logger.Error.Printf("Неподчинение фазы %d приходит %d", phase, state.PhaseTU)
+		dk = data.DataValue.GetDK()
+		dk.EDK = 8
+		data.DataValue.SetDK(dk)
+	} else {
+		dk = data.DataValue.GetDK()
+		dk.EDK = 0
+		data.DataValue.SetDK(dk)
 	}
-	return false
+
 }
