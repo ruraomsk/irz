@@ -114,7 +114,6 @@ func CreateSession(_ rui.Session) rui.SessionContent {
 		{"TrafficData", trafficShow, nil},
 		{"Настройки", setupShow, nil},
 	}
-
 	return sessionContent
 }
 func (d *NowSession) CreateRootView(session rui.Session) rui.View {
@@ -181,7 +180,7 @@ func Web() {
 	addr := ":8000"
 	logger.Info.Printf("Start web to %s ", addr)
 	// addr := "localhost:8000"
-	if rui.GetLocalIP() == "192.168.2.100" {
+	if rui.GetLocalIP() == "172.16.58.1" {
 		rui.OpenBrowser("http://" + addr)
 	}
 	rui.StartApp(addr, CreateSession, rui.AppParams{
