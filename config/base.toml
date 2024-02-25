@@ -1,20 +1,12 @@
 logpath = "log/"
-# id = 102
-id = 198460 #Номер устройства дома
-# id=230412
-# id=108682			#Номер в Элисте
+id = 103
 immitator = false #если истина то запускать имитатор 
 [server]
-# host = "asdu.tech"
-host = "10.151.50.126"
-# host = "192.168.2.156"
-# host = "192.168.88.2"
+host = "asdu.tech"
 port = 1093
 [pudge]
 dbpath = "db/"
 [modbus]
-# device="rtu:///dev/ttyUSB0"
-# device = "rtu:///dev/ttyEXTRA2_00"
 device = "rtu:///dev/com1"
 baudrate = 19200
 parity = "N"
@@ -24,19 +16,17 @@ radar = false           #если истинно нужно открывать �
 master = true
 debug = false
 host = "178.176.55.215"
-# host = "127.0.0.1"
 port = 15001
 id = 11
 chanels = 16
 [visiodevice]
 visio = false           #если истино то есть индикаторы обратного отсчета
 device = "/dev/ttyUSB0"
-#device="rtu:///dev/ttyEXTRA2_00"
 baudrate = 19200
 parity = "N"
 [trafficdata]
 work = false
-debug = true       #Запускать иммитатор
+debug = false      #Запускать иммитатор
 host = "127.0.0.1"
 port = 1666
 listen = 1667
